@@ -9,7 +9,28 @@ output: pdf_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Part 1
+## Part I
 
-Test for Git
+### 1. What are the atomic vector types in R? Explain which value they can take and give an example!
+
+There are six “atomic” (or “basic”) vector types in R:
+
+* character: Text, i.e. string variables.
+* numeric: Real numbers, i.e. float variables.
+* integer: Integers, i.e. values in  $\mathbb{Z}$.
+* complex: Complex numbers, i.e. a pair of values with a real and imaginary part.
+* logical: Boolean variables, i.e. either 1 (`TRUE`) or 0 (`FALSE`).
+* raw: A raw vector contains fixed-length sequences of bytes.
+
+**Examples**
+```{r ExAtomicVectorTypes}
+a <- c("blue", "red", "yellow")     ## character
+b <- c(pi, exp(1), 0, 1)            ## numeric
+c <- 1:10                           ## integer
+d <- c(0+1i, 1+1i)                  ## complex
+e <- c(TRUE, FALSE)                 ## logical
+f <- raw(length = 3L)               ## raw
+```
+
+It is important to note, that a vector can only contain elements of the same type. We can check the type of an object using the `class`-function.
 
