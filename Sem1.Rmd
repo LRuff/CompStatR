@@ -13,14 +13,14 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ### 1. What are the atomic vector types in R? Explain which value they can take and give an example!
 
-There are six “atomic” (or “basic”) vector types in R:
+There are six *atomic* (or *basic*) vector types in R:
 
-* character: Text, i.e. string variables.
-* numeric: Real numbers, i.e. float variables.
-* integer: Integers, i.e. values in  $\mathbb{Z}$.
-* complex: Complex numbers, i.e. a pair of values with a real and imaginary part.
-* logical: Boolean variables, i.e. either 1 (`TRUE`) or 0 (`FALSE`).
-* raw: A raw vector contains fixed-length sequences of bytes.
+* **character**: Text, i.e. string variables.
+* **numeric**: Real numbers, i.e. float variables.
+* **integer**: Integers, i.e. values in  $\mathbb{Z}$.
+* **complex**: Complex numbers, i.e. a pair of values with a real and imaginary part.
+* **logical**: Boolean variables, i.e. either 1 (`TRUE`) or 0 (`FALSE`).
+* **raw**: A raw vector contains fixed-length sequences of bytes.
 
 **Examples**
 ```{r ExAtomicVectorTypes}
@@ -34,3 +34,56 @@ f <- raw(length = 3L)               ## raw
 
 It is important to note, that a vector can only contain elements of the same type. We can check the type of an object using the `class`-function.
 
+### 2. What is the difference between generic and atomic vectors?
+
+*Generic vector* is just another name for *list*. The difference between lists and atomic vectors is, that lists can contain objects of different classes, i.e. the elements of a list do not have to be of the same object type.
+
+### 3. Explain the following statement: “A data frame is a list, but not every list is a data frame.”
+
+A data frame is a special type of list where each element has to be of the same length. We can think of a data frame as a table or matrix, where each row is an observation and each column a different variable. The columns of a data frame are the elements of this special type of list. Therefore, every column can store different types of objects. The length of each element or column are the number of rows or observations. 
+Hence, data frames are a subset of lists, i.e. every data frame is a list, but not every list is a data frame because generally, the elements of a list can be of different lengths.
+
+
+## Part II
+
+The following code will perform a simulation of 100'000'000 samples from a $\mathcal{N}(5,10)$ distribution, i.e. a normal distribution with mean $\mu = 5$ and standard deviation $\sigma = 10$. For reproducibility, we set a seed for the random number generator. In a second step, the cumulative sums of the first 100 samples are computed in two different ways, where the function `cumsum` returns a vector where element $i$ is the cumulative sum up to sample $i$. Finally, we check if the two ways of computing the cumulative sums up to sample 100 result in exactly equal vectors.
+
+The code with comments in detail:
+
+```{r NormSim}
+# Set the state of the random number generator (RNG) to 1
+set.seed(1)
+
+# Perform simulation of 1e8 samples from a normal distribution with mean 5
+# and standard deviation 10
+largeVector <- rnorm(1e8, mean=5, sd=10)
+
+# Compute the cumulative sums for the whole "largeVector" and subset the
+# first 100 elements
+a <- cumsum(largeVector)[1:100]
+
+# Compute the cumulative sums only for the first 100 elements of
+# "largeVector"
+b <- cumsum(largeVector[1:100])
+
+# Check, whether both ways of computation are exactly identical
+identical(a, b)
+```
+
+Of course, both ways of computing the cumulative sums for the first 100 samples above have the same result and hence `identical(a, b)` returns `TRUE`, but computation `a` is very inefficient compared to computation `b` since we first apply `cumsum` to the whole `largeVector`, i.e. we compute the cumulative sums for 100'000'000 elements and then only look at the first 100 elements. Computation `b` instead only computes the cumulative sums for the subset of the first 100 elements of `largeVector`.
+In the following code, we stop the time for each of the two ways of computation:
+
+```{r Comp1}
+# Computation method a
+system.time(cumsum(largeVector)[1:100])
+```
+
+```{r Comp2}
+# Computation method b
+system.time(cumsum(largeVector[1:100]))
+```
+
+The results prove our reasoning above, since the first computation takes much longer than the second.
+
+
+## Part III
