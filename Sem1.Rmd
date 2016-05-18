@@ -55,16 +55,27 @@ In conclusion `list` and `data frame` are very similar, but the `data frame` has
 
 The following code will perform a simulation of 100'000'000 samples from a $\mathcal{N}(5,10)$ distribution, i.e. a normal distribution with mean $\mu = 5$ and standard deviation $\sigma = 10$. For reproducibility, we set a seed for the random number generator. In a second step, the cumulative sums of the first 100 samples are computed in two different ways, where the function `cumsum` returns a vector where element $i$ is the cumulative sum up to sample $i$. Finally, we check if the two ways of computing the cumulative sums up to sample 100 result in exactly equal vectors.
 
-The code with comments in detail:
+For random number generation R uses pseudo-random numbers. Starting from an initial state, called *seed state*, it will produce a deterministic sequence, which is used as random numbers. By choosing the same seed in every turn, we get the same results. To make the results of random numbers comparable, we first set the seed in a sepecific state, using `set.seed`.  
+After setting the seed, we define a vector with (pseudo-) random values. Using the `rnorm` function we create the $1 \cdot 10^8$ normal distributed random values and save them in a vector called `largeVector`.
 
-```{r NormSim}
+```{r NormSim1}
 # Set the state of the random number generator (RNG) to 1
 set.seed(1)
 
 # Perform simulation of 1e8 samples from a normal distribution with mean 5
 # and standard deviation 10
 largeVector <- rnorm(1e6, mean=5, sd=10)
+```
 
+The function `cumsum`, which is used in the next code block, calculates the cumulative sum of the values of the vector. It takes all elements one by one and calculates for this element the sum of all elements before, including the current element. These values will be the new elements of the new vector. Consider following example:
+
+$$
+\left(\begin{array}{ccc}1\\ 4\\ 3\end{array}\right) \quad \overset{\texttt{cumsum}}{\xrightarrow{\hspace*{1cm}}} \quad \left(\begin{array}{ccc}1\\ 5\\ 8\end{array}\right)
+$$
+
+In case `a` it is doing `cumsum` of the whole vector `largeVector`. Afterwards it just takes the first 100 elements and saves them in vector `a`. In case `b` it first takes the 100 first elements of `largeVector` and calculates the `cumsum` afterwards, with only those 100 elements. The result is saved in vector `b`. In the end the two vectors `a` and `b` are checked for exact equality, using `identical` function.
+
+```{r NormSim2}
 # Compute the cumulative sums for the whole "largeVector" and subset the
 # first 100 elements
 a <- cumsum(largeVector)[1:100]
@@ -77,8 +88,9 @@ b <- cumsum(largeVector[1:100])
 identical(a, b)
 ```
 
-Of course, both ways of computing the cumulative sums for the first 100 samples above have the same result and hence `identical(a, b)` returns `TRUE`, but computation `a` is very inefficient compared to computation `b` since we first apply `cumsum` to the whole `largeVector`, i.e. we compute the cumulative sums for 100'000'000 elements and then only look at the first 100 elements. Computation `b` instead only computes the cumulative sums for the subset of the first 100 elements of `largeVector`.
-In the following code, we stop the time for each of the two ways of computation:
+Of course, both ways of computing the cumulative sums for the first $100$ samples above have the same result and hence `identical(a, b)` returns `TRUE`, but computation `a` is very inefficient compared to computation `b` since we first apply `cumsum` to the whole `largeVector`, i.e. we compute the cumulative sums for $100'000'000$ elements and then only look at the first $100$ elements. Computation `b` instead only computes the cumulative sums for the subset of the first $100$ elements directly.
+
+In the following code, we stop the time for each of the two ways of computation using `system.time` function.
 
 ```{r Comp1}
 # Computation method a
@@ -90,11 +102,11 @@ system.time(cumsum(largeVector)[1:100])
 system.time(cumsum(largeVector[1:100]))
 ```
 
-The results prove our reasoning above, since the first computation takes much longer than the second.
+The *user* CPU time and the *system* CPU time is a technical distinction in time running the R code and time used in operating system kernel on behalf of the R code. The interesting time is the *elapsed* time, which is the sum of the *user* time and the *system* time. We can see that the first operation of taking the `cumsum` of the whole `largeVector` with its $100$ million elements (and reducing the vector to $100$ elements afterwards) takes a lot more CPU calucaltion time than taking the `cumsum` of the first $100$ elements directly.
 
+The results prove our reasoning above, the second method is much more efficient than the first method, because finally end we are only interested in the `cumsum` of the first $100$ elements of the vector.
 
 ## Part III
-
 
 We consider dataset from ``Munchner Mietspiegel 2003'' which contains $13$ variables about $2053$ flats in Munich. In the dataset the logical variables have following encoding: \lq yes\rq\ is $1$ and \lq no\rq\ is $0$. The variables are:
 
