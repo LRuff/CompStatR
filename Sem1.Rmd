@@ -34,15 +34,22 @@ f <- raw(length = 3L)               ## raw
 
 It is important to note, that a vector can only contain elements of the same type. We can check the type of an object using the `class`-function.
 
+```{r CheckAtomicVectorTypes}
+# verify types by using class function
+lapply(list(a,b,c,d,e,f), class)
+```
+
 ### 2. What is the difference between generic and atomic vectors?
 
-*Generic vector* is just another name for *list*. The difference between lists and atomic vectors is, that lists can contain objects of different classes, i.e. the elements of a list do not have to be of the same object type.
+  * An *atomic vector* can only contains objects of the same class. An example would be a vector which contains only integers.
+  * A *generic vector* (in R representend as a `list`) can conatain objects of different classes. An example would be a vector which contains characters and numbers.
 
 ### 3. Explain the following statement: “A data frame is a list, but not every list is a data frame.”
 
-A data frame is a special type of list where each element has to be of the same length. We can think of a data frame as a table or matrix, where each row is an observation and each column a different variable. The columns of a data frame are the elements of this special type of list. Therefore, every column can store different types of objects. The length of each element or column are the number of rows or observations. 
-Hence, data frames are a subset of lists, i.e. every data frame is a list, but not every list is a data frame because generally, the elements of a list can be of different lengths.
+  * A `list` is an object containing collections of objects. The types of the elements of the list can be different. It is for example allowed that a `list` contains a vector of real values (doubles) and a vector of characters. The length of the containing vectors can be *different*.
+  * A `data frame` is also an object containing colletions of objects. The types of the elements of the list can also be different. But the length of the containing vectors have to be *the same*. We can think of a `data frame` as a table or matrix, where each row is an observation and each column a different variable. The length of each element or column are the number of rows or observations.
 
+In conclusion `list` and `data frame` are very similar, but the `data frame` has one more restriction (same length of all vectors). That is why a `data frame` is always a `list`, but a `list` is not always a `data frame`.
 
 ## Part II
 
@@ -56,7 +63,7 @@ set.seed(1)
 
 # Perform simulation of 1e8 samples from a normal distribution with mean 5
 # and standard deviation 10
-largeVector <- rnorm(1e8, mean=5, sd=10)
+largeVector <- rnorm(1e6, mean=5, sd=10)
 
 # Compute the cumulative sums for the whole "largeVector" and subset the
 # first 100 elements
