@@ -18,6 +18,7 @@ knitr::opts_chunk$set(echo = TRUE,
                       message = FALSE)
 ```
 
+
 ## Part I
 
 ### 1. What are the atomic vector types in R? Explain which value they can take and give an example!
@@ -60,14 +61,15 @@ lapply(list(a,b,c,d,e,f), class)
 
 In conclusion, `list` and `data frame` are very similar, but the `data frame` has one more restriction (same length of all vectors). That is why a `data frame` is always a `list`, but a `list` is not always a `data frame`.
 
+
 ## Part II
 
 The following code will perform a simulation of 100'000'000 samples from a $\mathcal{N}(5,10)$ distribution, i.e. a normal distribution with mean $\mu = 5$ and standard deviation $\sigma = 10$. For reproducibility, we set a seed for the random number generator. In a second step, the cumulative sums of the first 100 samples are computed in two different ways, where the function `cumsum` returns a vector where element $i$ is the cumulative sum up to sample $i$. Finally, we check if the two ways of computing the cumulative sums up to sample 100 result in exactly equal vectors.
 
-For random number generation R uses pseudo-random numbers. Starting from an initial state, called *seed state*, it will produce a deterministic sequence, which is used as random numbers. By choosing the same seed in every turn, we get the same results. To make the results of random numbers comparable, we first set the seed in a sepecific state, using `set.seed`.  
-After setting the seed, we define a vector with (pseudo-) random values. Using the `rnorm` function we create the $1 \cdot 10^8$ normal distributed random values and save them in a vector called `largeVector`.
+For random number generation R uses pseudo-random numbers. Starting from an initial state, called *seed state*, it will produce a deterministic sequence, which is used as random numbers. By choosing the same seed in every turn, we get the same results. To make the results of random numbers comparable, we first set the seed in a specific state, using `set.seed`.  
+After setting the seed, we define a vector with (pseudo-) random values. Using the `rnorm`-function we create the $1 \cdot 10^8$ normal distributed random values and save them in a vector called `largeVector`.
 
-```{r NormSim1, eval=TRUE}
+```{r NormSim1, eval=FALSE}
 # Set the state of the random number generator (RNG) to 1
 set.seed(1)
 
@@ -78,13 +80,13 @@ largeVector <- rnorm(1e8, mean=5, sd=10)
 
 The function `cumsum`, which is used in the next code block, calculates the cumulative sum of the values of the vector. It takes all elements one by one and calculates for this element the sum of all elements before, including the current element. These values will be the elements of the new vector. Consider the following example:
 
-$$
+\[
 \left(\begin{array}{ccc}1\\ 4\\ 3\end{array}\right) \quad \overset{\texttt{cumsum}}{\xrightarrow{\hspace*{1cm}}} \quad \left(\begin{array}{ccc}1\\ 5\\ 8\end{array}\right)
-$$
+\]
 
-In case `a` it is doing `cumsum` on the whole vector `largeVector`. Afterwards it just takes the first 100 elements and saves them in vector `a`. In case `b` it first takes the 100 first elements of `largeVector` and calculates the `cumsum` afterwards, with only those 100 elements. The result is saved in vector `b`. In the end the two vectors `a` and `b` are checked for exact equality, using the `identical` function.
+In case `a` it is doing `cumsum` on the whole vector `largeVector`. Afterwards it just takes the first 100 elements and saves them in vector `a`. In case `b` it first takes the 100 first elements of `largeVector` and calculates the `cumsum` afterwards, with only those 100 elements. The result is saved in vector `b`. In the end the two vectors `a` and `b` are checked for exact equality, using the `identical`-function.
 
-```{r NormSim2, eval=TRUE}
+```{r NormSim2, eval=FALSE}
 # Compute the cumulative sums for the whole "largeVector" and subset the
 # first 100 elements
 a <- cumsum(largeVector)[1:100]
@@ -99,21 +101,22 @@ identical(a, b)
 
 Of course, both ways of computing the cumulative sums for the first $100$ samples above have the same result and hence `identical(a, b)` returns `TRUE`, but computation `a` is very inefficient compared to computation `b` since we first apply `cumsum` to the whole `largeVector`, i.e. we compute the cumulative sums for $100'000'000$ elements and then only look at the first $100$ elements. Computation `b` instead only computes the cumulative sums for the subset of the first $100$ elements directly.
 
-In the following code, we stop the time for each of the two ways of computation using the `system.time` function.
+In the following code, we stop the time for each of the two ways of computation using the `system.time`-function.
 
-```{r Comp1, eval=TRUE}
+```{r Comp1, eval=FALSE}
 # Computation method a
 system.time(cumsum(largeVector)[1:100])
 ```
 
-```{r Comp2, eval=TRUE}
+```{r Comp2, eval=FALSE}
 # Computation method b
 system.time(cumsum(largeVector[1:100]))
 ```
 
-The *user* CPU time and the *system* CPU time is a technical distinction in time running the R code and time used in operating system kernel on behalf of the R code. The interesting time is the *elapsed* time, which is the sum of the *user* time and the *system* time. We can see that the first operation of taking the `cumsum` of the whole `largeVector` with its $100$ million elements (and reducing the vector to $100$ elements afterwards) takes a lot more CPU calucaltion time than taking the `cumsum` of the first $100$ elements directly.
+The *user* CPU time and the *system* CPU time is a technical distinction in time running the R code and time used in operating system kernel on behalf of the R code. The interesting time is the *elapsed* time, which is the sum of the *user* time and the *system* time. We can see that the first operation of taking the `cumsum` of the whole `largeVector` with its $100$ million elements (and reducing the vector to $100$ elements afterwards) takes a lot more CPU calculation time than taking the `cumsum` of the first $100$ elements directly.
 
 The results prove our reasoning above, the second method is much more efficient than the first one, because finally we are only interested in the `cumsum` of the first $100$ elements of the vector.
+
 
 ## Part III
 
@@ -133,7 +136,7 @@ In our regression analysis, we will analyze the rental prices in Munich from 200
 * **badextra**: optional extras in bathroom? (Y=1, N=0)
 * **kueche**: luxury kitchen? (Y=1, N=0)
 
-We would like to predict and explain the rental prices, i.e.\ the dependent variable of our regression analysis will be the net rent in EUR `nm`. All other variables are potential explanatory variables for our linear regression model.
+We would like to build a model to predict and explain rental prices, i.e.\ the dependent variable of our regression analysis will be the net rent in EUR `nm`. All other variables are potential explanatory variables for our linear regression model.
 
 ### Data Import, Validation and Cleaning
 
@@ -147,7 +150,7 @@ str(miete)
 summary(miete)
 ```
 
-Before we go into the variables of our data in detail, let's do a quick check on missing values:
+Before we go into the variables of our data in detail, let's do a quick check on missing values using the `is.na`-function:
 
 ```{r MissingVal}
 # Check for NA's
@@ -155,49 +158,56 @@ sum(is.na(miete))
 ```
 
 There seem to be no missing values in our dataset. 
-Now, let's think about plausibility and the data types of our variables. From the five-number summary (`Min.`, `1st Qu.`, `Median`, `3rd Qu.`, `Max,`) and `Mean` values shown by `summary`, we can see that `nm`, `nmqm`, `wfl`, and `rooms` are properly formated and within reasonable ranges. By definition of the variables, we should have that
 
-\begin{eqnarray}
-\frac{\texttt{nm}}{\texttt{wfl}} &=&  \texttt{nmqm}
-\end{eqnarray}
+Now, let's think about plausibility and the data types of our variables. From the five-number summary (`Min.`, `1st Qu.`, `Median`, `3rd Qu.`, `Max,`) and `Mean` values shown by `summary`, we can see that `nm`, `nmqm`, `wfl`, and `rooms` are properly formatted and within reasonable ranges. By definition of the variables, we should have that
 
-Let's check whether this relationship holds by comparing the summary of `nmqm` and $\frac{\texttt{nm}}{\texttt{wfl}}$ and having a look at the sum of absolute errors (in relative terms):
+\[
+\frac{\texttt{nm}}{\texttt{wfl}} = \texttt{nmqm}
+\]
 
-```{r}
+Let's check whether this relationship holds by comparing the summary of `nmqm` with the summary of $\frac{\texttt{nm}}{\texttt{wfl}}$ and having a look at the sum of absolute errors (in relative terms):
+
+```{r nmqmConsistency}
 summary(miete$nmqm)
+# Rebuild nmqm from nm and wfl
 nmqm2 <- miete$nm / miete$wfl
 summary(nmqm2)
+# Compute sum of absolute values and account for scale
 sum(abs(miete$nmqm - nmqm2)) / sum(nmqm2)
 ```
 
 There are only minor differences which are negligible and probably caused by rounding originally numeric values of `wfl` to integers.
-Since the year of construction, `bj`, contains values of years, we can convert it to integers:
+Since the year of construction, `bj`, contains values of years, we can convert it to integers using `as.integer`:
 
 ```{r Convert$bj}
 miete$bj <- as.integer(miete$bj)
 ```
 
-The factor variable `bez`, indicating the district where the respective flat is located, has 25 levels. Let's have a closer look:
+The factor variable `bez`, indicating the district where the respective flat is located, has 25 levels. Let's have a quick look on how many apartments there are per district calling the `table`-function:
 
 ```{r Table$bez}
 table(miete$bez)
 ```
 
-The remaining variables (`wohngut`, `wohnbest`, `ww0`, `zh0`, `badkach0`, `badextra`, `kueche`) are all binary and valid which we can see from the summary above, since `Min.`\ is 0 and `Max.`\ is 1 for all those variables. Let's convert them properly:
+The remaining variables (`wohngut`, `wohnbest`, `ww0`, `zh0`, `badkach0`, `badextra`, `kueche`) are all binary with valid observations which we can see from the summary above, since `Min.`\ is 0 and `Max.`\ is 1 for all those variables. We choose to reformat them as factor variables with two levels, “Yes” and “No”, for the purpose of convenient labeling (e.g.\ in plots) in our further analysis. This can be achieved by subsetting accordingly and applying the `as.factor`-function:
 
 ```{r ConvertBinaries}
-miete[7:13] <- lapply(miete[7:13], as.logical)
+# Y=1 and N=0 variables
+miete[c(7,8,12,13)][miete[c(7,8,12,13)] == 1] <- "Yes"
+miete[c(7,8,12,13)][miete[c(7,8,12,13)] == 0] <- "No"
+
+# Y=0 and N=1 variables
+miete[9:11][miete[9:11] == 1] <- "No"
+miete[9:11][miete[9:11] == 0] <- "Yes"
+
+# Convert to factor variables
+miete[7:13] <- lapply(miete[7:13], as.factor)
+
+# Remove the "0" in the names of the variables with Y=0 and N=1
+names(miete)[9:11] <- c("ww", "zh", "badkach")
 ```
 
 Now, we have a nice and tidy dataset and can proceed exploring our data.
-
-
-<!-- If we also want to get some extra information like the standard deviation and maybe skew and kurtosis, we can use the `psych` library and the containing function `describe`. In this case we include all variables. -->
-
-```{r}
-# library(psych)
-# describe(miete)
-```
 
 ### Exploratory Analysis
 
@@ -205,9 +215,9 @@ Before building a model, we would like to better understand our data by using di
 
 The dependent variable of our model will be `nm`. Therefore, it would be nice to have a look at some scatterplots with different regressors to get a first impression on the correlation between the dependent variable and the potential regressors.
 
-Net rent per $m^2$ (`nmqm`) is the net rent (`nm`) per living space (`wfl`) as we have already seen above. Therefore, it is not appropriate to use `nmqm` as an explanatory variable because we would use rent pricing information to explain rent pricing information. Since we have living space `wfl` as a sepearte variable, `nmqm` is of no additional explanatory value. Hence, we would expect `nm` to be highly positively correlated with `nmqm`. Let's verify our reasoning with a scatterplot:
+Net rent per $m^2$ (`nmqm`) is the net rent (`nm`) per living space (`wfl`) as we have already seen above. Therefore, it is not appropriate to use `nmqm` as an explanatory variable because we would use rent pricing information to explain rent pricing information. Since we have living space `wfl` as a separate variable, `nmqm` is of no additional explanatory value. Let's verify our reasoning with a scatterplot using the `plot`-function, where we expect `nm` to be highly positively correlated with `nmqm`:
 
-```{r Exp$nmqm}
+```{r Plot$nmqm}
 plot(miete$nmqm,
      miete$nm,
      xlab = expression(paste("Net rent per m"^"2", " in EUR")),
@@ -218,7 +228,7 @@ As expected, we can see a strong positive correlation.
 
 Next, we will have a look at living space `wfl`. Naturally, one would assume prices to be higher for larger spaces. Let's have a look:
 
-```{r Exp$wfl}
+```{r Plot$wfl}
 plot(miete$wfl,
      miete$nm,
      xlab = expression(paste("Living Space in m"^"2")),
@@ -227,104 +237,160 @@ plot(miete$wfl,
 
 Indeed, there seems to be a positive correlation and therefore we expect living space to be a significant regressor later in our model.
 
-A further potential regressor are the number of rooms (`rooms`) available in a flat. Number of rooms ranges from 1 to 6 rooms at most. Therefore, a boxplot would be nice to get a first impression on how net rent varies with room number:
+A further potential regressor are the number of rooms (`rooms`) available in a flat. Number of rooms ranges from one to six rooms at most. Therefore, a `boxplot` is suitable to get a first impression on how net rent varies by number of rooms:
 
-```{r Exp$rooms}
+```{r Plot$rooms}
 boxplot(nm ~ as.factor(rooms), data = miete,
         xlab = "Number of Rooms",
         ylab = "Net Rent in EUR")
 ```
 
-From the boxplot, we can observe higher net rents for flats with more rooms (although from 5 to 6 rooms there doesn't seem to be a significant difference). But we have to be careful with our reasoning. Since more rooms most likely mean larger living space (or the other way round), this positive relationship in the plot could already be explained by `wfl`. For example, if people generally prefer more open rooms for some fixed living space, i.e.\ fewer rooms per space, and are willing to pay more for this kind of architechture, then there could even be a reducing effect of more rooms on renting prices, when pure living space has already explained a higher renting price level.
+From the boxplot, we can observe higher net rents for flats with more rooms (although from 5 to 6 rooms there doesn't seem to be a significant difference). But we have to be careful with our conclusion. Since more rooms most likely mean larger living space (or the other way round), this positive relationship in the plot could already be explained by `wfl`. For example, if people generally prefer more open rooms for some fixed living space, i.e.\ fewer rooms per space, and are willing to pay more for this kind of architecture, then there could even be a reducing effect of more rooms on renting prices, when pure living space has already explained a higher renting price level.
 
-For the effect of the year of construction on net rents, we do not have a clear intuition, since very old, but renovated buildings could also be of high value. Let's look at the scatterplot:
+For the effect of the year of construction (`bj`) on net rents, we do not have a clear intuition, since very old but renovated buildings could also be of high value. Let's look at the scatterplot:
 
-```{r Exp$bj}
+```{r Plot$bj}
 plot(miete$bj,
      miete$nm,
      xlab = "Year of Construction",
      ylab = "Net Rent in EUR")
 ```
 
-From the plot, there doesn't seem to be a significant relationship.
+From the plot, there seems to be a slightly positive relationship.
 
-Another candidate for providing explanatory value on rent levels is the district, where the respective property is located (`bez`). For example, one would expect higher levels in districts close to the center of Munich. Overall, the observations in our dataset are located in 25 different districts. A complete list of all districts of Munich for example can be found at [en.wikipedia.org/wiki/Boroughs_of_Munich](https://en.wikipedia.org/wiki/Boroughs_of_Munich). Munich has 25 districts in total, i.e.\ the dataset contains flats from all districts. Let's consider a boxplot:
+Another candidate for providing explanatory value on rent levels is the district, where the respective property is located (`bez`). Generally, one would expect higher rental levels in districts close to the center of Munich. Overall, the observations in our dataset are located in 25 different districts. A complete list of all districts of Munich can for example be found at [en.wikipedia.org/wiki/Boroughs_of_Munich](https://en.wikipedia.org/wiki/Boroughs_of_Munich). Munich has 25 districts in total, i.e.\ the dataset contains flats from all districts. Let's consider a boxplot:
 
-```{r Exp$bez}
+```{r Plot$bez}
 boxplot(nm ~ bez, data = miete,
         xlab = "District of flat",
         ylab = "Net Rent in EUR")
 ```
 
-From the boxplot we can see, that rental prices in district 1 are relatively
-high. This is the “Altstadt-Lehel”-district, which is the center of Munich.
-Since we will incorporate the factor variable `bez` as a dummy-variables in our
-linear regression, the “Altstadt-Lehel”-district will be our reference-district
-(zero encoded). Hence, we expect from looking at the boxplot, that different
-districts will have a decreasing effect on rental prices when compared to the
-benchmark “Altstadt-Lehel”. For example, lower rental prices could be expected in district 11 (“Milbertshofen-Am Hart”) or district 14 (“Berg am Laim”).
+From the boxplot we can see, that rental prices in district 1 are relatively high. This is the “Altstadt-Lehel”-district, which is the center of Munich where the “Marienplatz” is also located. Since we will incorporate the factor variable `bez` as a dummy-variables in our linear regression, the “Altstadt-Lehel”-district will be our reference-district (i.e.\ zero encoded dummy). Hence, we expect from looking at the boxplot, that different districts will have a decreasing effect on rental prices when compared to the benchmark “Altstadt-Lehel”. For example, lower rental prices could be expected in district 11 (“Milbertshofen-Am Hart”) or district 14 (“Berg am Laim”).
 
-To complete our exploratory analysis, let's consider a further plot, showing boxplots of all binary variables:
+To complete our exploratory analysis, let's consider a further plot, showing the boxplots of all binary variables:
 
-```{r Exp$Binary}
+```{r Plot$Binary}
 # Prepare for multiple base plots
 par(mfrow = c(2,4))
 
 # Labels
-nmLab <- "Net Rent in EUR"
-BinLab <- c("Good Residential Area? (Y=1, N=0)",
-            "Best Residential Area? (Y=1, N=0)",
-            "Hot Water Supply? (Y=0, N=1)",
-            "Central Heating? (Y=0, N=1)",
-            "Tiled Bathroom? (Y=0, N=1)",
-            "Optional Extras in Bathroom? (Y=1, N=0)",
-            "Luxury Kitchen? (Y=1, N=0)")
+nmLabel <- "Net Rent in EUR"
+BinLabel <- c("Good Residential Area?",
+            "Best Residential Area?",
+            "Hot Water Supply?",
+            "Central Heating?",
+            "Tiled Bathroom?",
+            "Opt. Extras in Bathroom?",
+            "Luxury Kitchen?")
 
 # Plot
 for (i in 7:13){
     boxplot(formula(paste("nm ~ ", names(miete)[i])),
             data = miete,
-            xlab = BinLab[i-6],
-            ylab = nmLab)
+            xlab = BinLabel[i-6],
+            ylab = nmLabel)
 }
 
 # Reset to single base plot
 par(mfrow = c(1,1))
-
-# Maybe convert binary variables to factor variables with proper Yes/No
-# labels... Also clean up xlabs...
 ```
 
-```{r Covariance}
-# Maybe plot covariance matrix of regressors to see relationships between regressors?
+From the boxplots it seems that each extra (i.e.\ an answer of “Yes” to each one of the questions) has an increasing effect on rental prices, since there are positive distribution shifts visible in every boxplot.
+
+### Model Specification
+
+In a first step, let's create a naive linear regression model using all available regressors. The function to fit linear models in R is `lm` (*linear model*). The first argument of `lm` is the regression formula. In this naive case, we would like to do a regression of the rent in EUR (`nm`) on all other variables (we can use the `.` to include all variables). Left of the tilde is the dependent variable, right of the tilde the regressors. In the second argument we set our dataset. To get a nice summary of the linear model, we can use the `summary`-function:
+
+```{r NaiveModel}
+# Fitting the naive linear regression
+lmNaive <- lm(nm ~ ., data = miete)
+summary(lmNaive)
 ```
 
+We can see in the output that `nmqm` is a significant regressor with a very low p-value. Besides, the number of rooms (`rooms`), good residential area (`wohngut`), central heating (`zh`), a tiled bathroom (`badkach`) and optional extras in the bathroom (`badextra`) are not significant at the 5%-level in this naive model.
+Although we have significant regressors, a very high adjusted $R^2$ of $`r summary(lmNaive)$adj.r.squared`$ and a very low p-value of the F-statistic, this model is fundamentally misspecified. As mentioned before, the variable `nmqm` is a transformation of our dependent variable `nm`. Therefore, if we include `nmqm` as a regressor, we would use (part of) the dependent variable to explain and estimate itself. In consequence, `nmqm` is neither appropriate for inference nor for prediction (one would have to know the price of an apartment in advance, before estimating the price). As a result, we will omit the variable `nmqm` in our model.
 
-### Identification of relevant regressors and model fit
-<!-- Original draft -->
+###  Fitting the Regression Model and Identification of relevant Regressors
 
-To idenfity relevant regressors we can apply `lm()`, which calculates a linear model, to all variables. The first argument of the function is the formular. In our case we want to do a regression of the rent in EUR (`miete\$nm`) on all other variables (we can use the `.` to include all variables). In the second argument we set our dataset.
+Let's fit a linear regression model omitting `nmqm`. This can be achieved by `-nmqm` in the regression formula. Again, we take a look at the model using the `summary`-function:
 
-```{r}
-regrel <- lm(miete$nm ~ ., data = miete)
+```{r lm1}
+# Fitting the regression model omitting nmqm
+lm1 <- lm(nm ~ .-nmqm, data = miete)
+summary(lm1)
 ```
 
-We can omit all variables which have no significant slope. To get the slope we can have a look to the `summary` of the result of the linear regression.
+In the summary we can see, that *all* regressors (except some district-dummies) are significant at the 99%-level, which is indicated by two asterisks (`**`) or more.
+To judge the relevance of the factor variable `bez`, we can consider all factor levels at once by means of a global F-Test. To perform a global F-Test on each regressor, we use the `anova`-function:
 
-```{r}
-summary(regrel)
+```{r F-Tests}
+# F-Tests on variables
+anova(lm1)
 ```
 
-We would suggest to include all variables which are significant on a $99\%$ level (* or **). With the relevant variables we can fit the regression.
+The F-Test confirms that `bez` is significant (at a greater than 99.9%-level) as well as all the other regressors. Hence, we already have identified all relevant regressors. 
 
-```{r}
-summary(lm(miete$nm ~ miete$nmqm + miete$wfl + miete$wohnbest +
-             miete$ww0 + miete$kueche, data = miete))
+In general, R provides a very useful procedure to identify relevant regressors automatically. Imagine having a very large number of potential regressors, then identifying all relevant regressors step by step manually can become very tedious. Fortunately, there is a function called `step` which chooses a model, i.e.\ selects relevant regressors, by the Akaike information criterion (AIC) in a stepwise algorithm automatically.
+Since all regressors in our model are already significant, the `step`-function should not be able to improve the model, that is finding a new model with a lower AIC by including and excluding regressors:
+
+```{r Step}
+# Chosse a model by AIC in a stepwise algorithm
+lm2 <- step(lm1)
+summary(lm2)
 ```
 
-### Discussion of Model Fit and Interpretation of the Model
+As expected, our model remains unchanged when applying the `step`-function.
 
-<!-- Check Fahrmeier on analysis -->
+### Discussion of Model Fit 
 
-## References
-<!-- Add some nice references to the dataset maybe -->
+As we have already seen, all regressors in our model are significant. Our model has a $R^2$ of `summary(lm1)$r.squared` and an adjusted $R^2$ of `summary(lm1)$adj.r.squared`. 
+
+To further evaluate the goodness of fit of our model, we check the distributional assumption of the linear model that errors are normally distributed with mean zero. We do this via a QQ-plot. In R, this can be done with `qqnorm` and `qqline`:
+
+```{r Q-Q Plot}
+# Build a Q-Q Plot
+qqnorm(lm1$residuals)
+qqline(lm1$residuals)
+```
+
+We can see that the residuals follow a symmetric distribution with mean zero which is similar to the normal but has fatter tails since the sample quantiles are smaller for negative and greater for positive values. To additionally test the normality assumption of the errors, we can perform a Shapiro-Wilk test:
+
+```{r Shapiro-Wilk test}
+# Perform Shapiro-Wilk test
+shapiro.test(lm1$residuals)
+```
+
+Hence, we must reject the null hypothesis of normality with a p-value of $`r shapiro.test(lm1$residuals)$p.value`$, i.e.\ there is strong evidence, that the assumption of normally distributed errors is false.
+
+Additionally, although we are considering a linear regression model, we have to think and account for non-linear effects. We can check for non-linear relationships between the dependent variable and individual (non-categorical) regressors by looking at the partial residuals of the individual regressors. R also has a function implemented to conveniently create plots of the partial residuals. We can create them using `termplot`:
+
+```{r PartialResiduals}
+# Plot partial residuals of wfl, rooms and bj using termplot
+termplot(model = lm1,
+         partial.resid = TRUE,
+         terms = c("wfl", "rooms", "bj"),
+         main = "Partial Residuals",
+         smooth = panel.smooth)
+```
+
+From the plots, we can see that there does not seem to be a clear non-linear effect or relationship.
+
+### Model Interpretation
+
+To conclude our analysis, we would like to give an interpretation of our model. 
+The net rent increases by $`r round(lm1$coefficients[["wfl"]], digits = 2)`$ EUR per $m^2$ of living space. Although net rent and the number of rooms are positively correlated, as we have seen in our exploratory analysis, the coefficient of `rooms` is negative, that is net rent decreases by $`r (-1)*round(lm1$coefficients[["rooms"]], digits = 2)`$ EUR per additional room. This statistical phenomena is called the Simpson's paradox and in our case is explained by the positive correlation between the number of rooms and living space:
+
+```{r Plot$roomswfl}
+plot(miete$rooms,
+     miete$wfl,
+     xlab = "Number of Rooms",
+     ylab = expression(paste("Living Space in m"^"2")))
+```
+
+Hence, after controlling for living space, rental prices decrease with additional number of rooms, i.e.\ tenants could have a preference for fewer, larger rooms.
+The coefficient for the year of construction is $`r round(lm1$coefficients[["bj"]], digits = 2)`$ EUR. Therefore, a 50 year old difference in year of construction would make a difference of about 75 EUR in our model, where the older apartment would be the cheaper one.
+Considering the effect of different districts, we have to interpret the statistically significant coefficients in relation to the reference district (“Altstadt-Lehel”). For example, our model predicts that renting an apartment in “Sendling-Westpark” (district 7) will be $`r (-1)*round(lm1$coefficients[["bez7"]], digits = 2)`$ EUR cheaper compared to “Altstadt-Lehel”. Other predicted savings compared to the center of Munich are $`r (-1)*round(lm1$coefficients[["bez11"]], digits = 2)`$ EUR in “Milbertshofen-Am Hart” (district 11) and $`r (-1)*round(lm1$coefficients[["bez16"]], digits = 2)`$ EUR in “Ramersdorf-Perlach” (district 16).
+Finally, we have statistically significant rental price increasing effects for all additional extras. The highest increase in net rent of $`r round(lm1$coefficients[["wwYes"]], digits = 2)`$ EUR is for hot water supply. Living in an apartment with a tiled bathroom that has fancy extras will cost an additional $`r round(lm1$coefficients[["badkachYes"]], digits = 2) + round(lm1$coefficients[["badextraYes"]], digits = 2)`$ EUR according to our model.
+
+In the end of our interpretation, we would like to remind that the interpretation has to be taken with a grain of salt, since, as we have seen above, the assumption of normally distributed errors is very likely violated for our data.
