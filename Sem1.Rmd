@@ -13,7 +13,9 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE,
+                      warning = FALSE,
+                      message = FALSE)
 ```
 
 ## Part I
@@ -48,15 +50,15 @@ lapply(list(a,b,c,d,e,f), class)
 
 ### 2. What is the difference between generic and atomic vectors?
 
-  * An *atomic vector* can only contains objects of the same class. An example would be a vector which contains only integers.
-  * A *generic vector* (in R representend as a `list`) can conatain objects of different classes. An example would be a vector which contains characters and numbers.
+  * An *atomic vector* can only contain objects of the same class. An example would be a vector which contains only integers.
+  * A *generic vector* (in R represented as a `list`) can contain objects of different classes. An example would be a vector which contains characters and numbers.
 
 ### 3. Explain the following statement: “A data frame is a list, but not every list is a data frame.”
 
-  * A `list` is an object containing collections of objects. The types of the elements of the list can be different. It is for example allowed that a `list` contains a vector of real values (doubles) and a vector of characters. The length of the containing vectors can be *different*.
-  * A `data frame` is also an object containing colletions of objects. The types of the elements of the list can also be different. But the length of the containing vectors have to be *the same*. We can think of a `data frame` as a table or matrix, where each row is an observation and each column a different variable. The length of each element or column are the number of rows or observations.
+  * A `list` is an object containing collections of objects. The types of the elements of the list can be different. It is for example allowed that a `list` contains a vector of real values (doubles) and a vector of characters. The lengths of the contained vectors can be *different*.
+  * A `data frame` is also an object containing colletions of objects. The types of the elements of the list can also be different. But the lengths of the contained vectors have to be *the same*. We can think of a `data frame` as a table or matrix, where each row is an observation and each column a different variable. The length of each element or column are the number of rows or observations.
 
-In conclusion `list` and `data frame` are very similar, but the `data frame` has one more restriction (same length of all vectors). That is why a `data frame` is always a `list`, but a `list` is not always a `data frame`.
+In conclusion, `list` and `data frame` are very similar, but the `data frame` has one more restriction (same length of all vectors). That is why a `data frame` is always a `list`, but a `list` is not always a `data frame`.
 
 ## Part II
 
@@ -65,24 +67,24 @@ The following code will perform a simulation of 100'000'000 samples from a $\mat
 For random number generation R uses pseudo-random numbers. Starting from an initial state, called *seed state*, it will produce a deterministic sequence, which is used as random numbers. By choosing the same seed in every turn, we get the same results. To make the results of random numbers comparable, we first set the seed in a sepecific state, using `set.seed`.  
 After setting the seed, we define a vector with (pseudo-) random values. Using the `rnorm` function we create the $1 \cdot 10^8$ normal distributed random values and save them in a vector called `largeVector`.
 
-```{r NormSim1}
+```{r NormSim1, eval=TRUE}
 # Set the state of the random number generator (RNG) to 1
 set.seed(1)
 
 # Perform simulation of 1e8 samples from a normal distribution with mean 5
 # and standard deviation 10
-largeVector <- rnorm(1e6, mean=5, sd=10)
+largeVector <- rnorm(1e8, mean=5, sd=10)
 ```
 
-The function `cumsum`, which is used in the next code block, calculates the cumulative sum of the values of the vector. It takes all elements one by one and calculates for this element the sum of all elements before, including the current element. These values will be the new elements of the new vector. Consider following example:
+The function `cumsum`, which is used in the next code block, calculates the cumulative sum of the values of the vector. It takes all elements one by one and calculates for this element the sum of all elements before, including the current element. These values will be the elements of the new vector. Consider the following example:
 
 $$
 \left(\begin{array}{ccc}1\\ 4\\ 3\end{array}\right) \quad \overset{\texttt{cumsum}}{\xrightarrow{\hspace*{1cm}}} \quad \left(\begin{array}{ccc}1\\ 5\\ 8\end{array}\right)
 $$
 
-In case `a` it is doing `cumsum` of the whole vector `largeVector`. Afterwards it just takes the first 100 elements and saves them in vector `a`. In case `b` it first takes the 100 first elements of `largeVector` and calculates the `cumsum` afterwards, with only those 100 elements. The result is saved in vector `b`. In the end the two vectors `a` and `b` are checked for exact equality, using `identical` function.
+In case `a` it is doing `cumsum` on the whole vector `largeVector`. Afterwards it just takes the first 100 elements and saves them in vector `a`. In case `b` it first takes the 100 first elements of `largeVector` and calculates the `cumsum` afterwards, with only those 100 elements. The result is saved in vector `b`. In the end the two vectors `a` and `b` are checked for exact equality, using the `identical` function.
 
-```{r NormSim2}
+```{r NormSim2, eval=TRUE}
 # Compute the cumulative sums for the whole "largeVector" and subset the
 # first 100 elements
 a <- cumsum(largeVector)[1:100]
@@ -97,21 +99,21 @@ identical(a, b)
 
 Of course, both ways of computing the cumulative sums for the first $100$ samples above have the same result and hence `identical(a, b)` returns `TRUE`, but computation `a` is very inefficient compared to computation `b` since we first apply `cumsum` to the whole `largeVector`, i.e. we compute the cumulative sums for $100'000'000$ elements and then only look at the first $100$ elements. Computation `b` instead only computes the cumulative sums for the subset of the first $100$ elements directly.
 
-In the following code, we stop the time for each of the two ways of computation using `system.time` function.
+In the following code, we stop the time for each of the two ways of computation using the `system.time` function.
 
-```{r Comp1}
+```{r Comp1, eval=TRUE}
 # Computation method a
 system.time(cumsum(largeVector)[1:100])
 ```
 
-```{r Comp2}
+```{r Comp2, eval=TRUE}
 # Computation method b
 system.time(cumsum(largeVector[1:100]))
 ```
 
 The *user* CPU time and the *system* CPU time is a technical distinction in time running the R code and time used in operating system kernel on behalf of the R code. The interesting time is the *elapsed* time, which is the sum of the *user* time and the *system* time. We can see that the first operation of taking the `cumsum` of the whole `largeVector` with its $100$ million elements (and reducing the vector to $100$ elements afterwards) takes a lot more CPU calucaltion time than taking the `cumsum` of the first $100$ elements directly.
 
-The results prove our reasoning above, the second method is much more efficient than the first method, because finally end we are only interested in the `cumsum` of the first $100$ elements of the vector.
+The results prove our reasoning above, the second method is much more efficient than the first one, because finally we are only interested in the `cumsum` of the first $100$ elements of the vector.
 
 ## Part III
 
