@@ -69,7 +69,7 @@ The following code will perform a simulation of 100'000'000 samples from a $\mat
 For random number generation R uses pseudo-random numbers. Starting from an initial state, called *seed state*, it will produce a deterministic sequence, which is used as random numbers. By choosing the same seed in every turn, we get the same results. To make the results of random numbers comparable, we first set the seed in a specific state, using `set.seed`.  
 After setting the seed, we define a vector with (pseudo-) random values. Using the `rnorm`-function we create the $1 \cdot 10^8$ normal distributed random values and save them in a vector called `largeVector`.
 
-```{r NormSim1, eval=FALSE}
+```{r NormSim1, eval=TRUE}
 # Set the state of the random number generator (RNG) to 1
 set.seed(1)
 
@@ -86,7 +86,7 @@ The function `cumsum`, which is used in the next code block, calculates the cumu
 
 In case `a` it is doing `cumsum` on the whole vector `largeVector`. Afterwards it just takes the first 100 elements and saves them in vector `a`. In case `b` it first takes the 100 first elements of `largeVector` and calculates the `cumsum` afterwards, with only those 100 elements. The result is saved in vector `b`. In the end the two vectors `a` and `b` are checked for exact equality, using the `identical`-function.
 
-```{r NormSim2, eval=FALSE}
+```{r NormSim2, eval=TRUE}
 # Compute the cumulative sums for the whole "largeVector" and subset the
 # first 100 elements
 a <- cumsum(largeVector)[1:100]
@@ -103,12 +103,12 @@ Of course, both ways of computing the cumulative sums for the first $100$ sample
 
 In the following code, we stop the time for each of the two ways of computation using the `system.time`-function.
 
-```{r Comp1, eval=FALSE}
+```{r Comp1, eval=TRUE}
 # Computation method a
 system.time(cumsum(largeVector)[1:100])
 ```
 
-```{r Comp2, eval=FALSE}
+```{r Comp2, eval=TRUE}
 # Computation method b
 system.time(cumsum(largeVector[1:100]))
 ```
@@ -309,7 +309,7 @@ summary(lmNaive)
 ```
 
 We can see in the output that `nmqm` is a significant regressor with a very low p-value. Besides, the number of rooms (`rooms`), good residential area (`wohngut`), central heating (`zh`), a tiled bathroom (`badkach`) and optional extras in the bathroom (`badextra`) are not significant at the 5%-level in this naive model.
-Although we have significant regressors, a very high adjusted $R^2$ of $`r summary(lmNaive)$adj.r.squared`$ and a very low p-value of the F-statistic, this model is fundamentally misspecified. As mentioned before, the variable `nmqm` is a transformation of our dependent variable `nm`. Therefore, if we include `nmqm` as a regressor, we would use (part of) the dependent variable to explain and estimate itself. In consequence, `nmqm` is neither appropriate for inference nor for prediction (one would have to know the price of an apartment in advance, before estimating the price). As a result, we will omit the variable `nmqm` in our model.
+Although we have significant regressors, a very high adjusted $R^2$ of $`r round(summary(lmNaive)$adj.r.squared, digits = 4)`$ and a very low p-value of the F-statistic, this model is fundamentally misspecified. As mentioned before, the variable `nmqm` is a transformation of our dependent variable `nm`. Therefore, if we include `nmqm` as a regressor, we would use (part of) the dependent variable to explain and estimate itself. In consequence, `nmqm` is neither appropriate for inference nor for prediction (one would have to know the price of an apartment in advance, before estimating the price). As a result, we will omit the variable `nmqm` in our model.
 
 ###  Fitting the Regression Model and Identification of relevant Regressors
 
@@ -344,7 +344,7 @@ As expected, our model remains unchanged when applying the `step`-function.
 
 ### Discussion of Model Fit 
 
-As we have already seen, all regressors in our model are significant. Our model has a $R^2$ of `summary(lm1)$r.squared` and an adjusted $R^2$ of `summary(lm1)$adj.r.squared`. 
+As we have already seen, all regressors in our model are significant. Our model has a $R^2$ of `r round(summary(lm1)$r.squared, digits = 4)` and an adjusted $R^2$ of `r round(summary(lm1)$adj.r.squared, digits = 4)`. 
 
 To further evaluate the goodness of fit of our model, we check the distributional assumption of the linear model that errors are normally distributed with mean zero. We do this via a QQ-plot. In R, this can be done with `qqnorm` and `qqline`:
 
