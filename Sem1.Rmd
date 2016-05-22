@@ -1,7 +1,7 @@
 ---
 title: "CompStat/R - Paper 1"
 author: "Group 2: Carlo Michaelis, Patrick Molligo, Lukas Ruff"
-date: "11 May 2016"
+date: "23 May 2016"
 fontsize: 11
 lof: false
 graphics: true
