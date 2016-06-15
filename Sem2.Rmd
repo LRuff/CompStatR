@@ -1,0 +1,39 @@
+---
+title: "CompStat/R - Paper 2"
+author: "Group 2: Carlo Michaelis, Patrick Molligo, Lukas Ruff"
+date: "21 June 2016"
+fontsize: 11
+lof: false
+graphics: true
+documentclass: article
+output:
+  pdf_document:
+    latex_engine: pdflatex
+    keep_tex: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      warning = FALSE,
+                      message = FALSE)
+```
+
+
+## Part I: Functions
+
+### Functions I
+
+### Functions II
+
+### Functions III
+
+
+## Part II: Scoping and related topics
+
+### Scoping I
+
+### Scoping II
+
+### Scoping III
+
+### Dynamic lookup
