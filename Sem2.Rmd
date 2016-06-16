@@ -70,10 +70,11 @@ meanVarSdSe <- function(x) {
   #   a numerical vector containing mean, variance, standard deviation
   #   and standard error of x
   
-  # First we check if we have a numerical vector
+  # We check if x is numeric vector
   # If not: stop and throw error
-  if( !is.numeric(x) )
+  if( !is.numeric(x) ) {
     stop("Argument need to be numeric.")
+  }
   
   # Create vector object
   y <- vector()
@@ -132,10 +133,11 @@ meanVarSdSe <- function(x, na.rm = FALSE) {
   #   a numerical vector containing mean, variance, standard deviation
   #   and standard error of x
   
-  # We check if we have a numerical vector
+  # We check if x is numeric vector
   # If not: stop and throw error
-  if( !is.numeric(x) )
+  if( !is.numeric(x) ) {
     stop("Argument need to be numeric.")
+  }
   
   # Create vector object
   y <- vector()
@@ -169,7 +171,61 @@ meanVarSdSe(c(x, NA), na.rm = TRUE)
 
 #### Part III
 
+Now we will use the function `dropNa` from Functions I to deal with missing values in `meanVarSdSe`.
+
+```{r meanVarSdSeDrop}
+meanVarSdSe <- function(x) {
+  # expects a numeric vector as an argument and returns the mean,
+  # the variance, the standard deviation and the standard error
+  # it also removes missing values if x contains some
+  # 
+  # Args:
+  #   x: numeric vector
+  #
+  # Returns:
+  #   a numerical vector containing mean, variance, standard deviation
+  #   and standard error of x
+  
+  # We check if x is numeric vector
+  # If not: stop and throw error
+  if( !is.numeric(x) ) {
+    stop("Argument need to be numeric.")
+  }
+  
+  # We check if x contains missing values
+  # If so: remove missing values using dropNA
+  if( sum(is.na(x)) > 0 ) {
+    x <- dropNa(x)
+  }
+  
+  # Create vector object
+  y <- vector()
+  
+  # Calculate mean, variance, standard deviation and standard error
+  # and save it in y
+  y[1] <- mean(x)
+  y[2] <- var(x)
+  y[3] <- sd(x)
+  y[4] <- y[3]/sqrt(length(x))
+  
+  # Set names to vector entries
+  names(y) <- c("mean", "var", "sd", "se")
+  
+  # Return the numeric vector y
+  y
+}
+```
+
+We used the function from Part I and added a condition which checks if we have missing values in `x`, using `is.na`. If the sum of `NA` values is greater than $0$ (if there is one or more missing value), we use the function `dropNA` from the beginning to remove all missing values. The remaining code of the function can stay like above in Part I.
+
+We can confirm the result:
+
+```{r meanVarSdSeDropTest}
+meanVarSdSe(c(x, NA))
+```
+
 ### Functions III
+
 
 
 ## Part II: Scoping and related topics
