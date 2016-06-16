@@ -108,6 +108,65 @@ class(meanVarSdSe(x))
 
 #### Part II
 
+Now we will have a look at the case below. We would expect that the function will return a vector with `NA`s:
+
+```{r meanVarSdSeNAProblem}
+x <- c(NA, 1:100)
+meanVarSdSe(x)
+```
+
+The reason for the result is that the functions `mean()`, `var()` and `sd()` use `na.rm = FALSE` as default, which means that missing values are not removed. If the vector `x` contains a missing value, the `mean()` function (`var()` and `sd()` respectively) will just return `NA` to inform about missing values. In the case of calculating standard error we use the result from our `sd()` function and calculate a `NA` value with some other numeric values, which will results in `NA` again.
+
+To solve the problem, we should can add `na.rm = TRUE` to those three functions. To make this optionally, we will improve the `meanVarSdSe` function from above as follows:
+
+```{r meanVarSdSeImprove}
+meanVarSdSe <- function(x, na.rm = FALSE) {
+  # expects a numeric vector and flag to handle missing values as an argument
+  # and returns the mean, the variance, the standard deviation
+  # and the standard error
+  # 
+  # Args:
+  #   x: numeric vector, na.rm: boolean
+  #
+  # Returns:
+  #   a numerical vector containing mean, variance, standard deviation
+  #   and standard error of x
+  
+  # We check if we have a numerical vector
+  # If not: stop and throw error
+  if( !is.numeric(x) )
+    stop("Argument need to be numeric.")
+  
+  # Create vector object
+  y <- vector()
+  
+  # Calculate mean, variance, standard deviation and standard error
+  # and save it in y
+  y[1] <- mean(x, na.rm = na.rm)
+  y[2] <- var(x, na.rm = na.rm)
+  y[3] <- sd(x, na.rm = na.rm)
+  if( na.rm == FALSE ) {
+    y[4] <- y[3]/sqrt(length(x))
+  } else {
+    y[4] <- y[3]/sqrt(length(x) - sum(is.na(x)))
+  }
+  
+  # Set names to vector entries
+  names(y) <- c("mean", "var", "sd", "se")
+  
+  # Return the numeric vector y
+  y
+}
+```
+
+We define the function with a second argument `na.rm` which has the default value `FALSE`. If we just give one argument, like `meanVarSdSe(x)` the function will take `na.rm = FALSE` for us and respectivly sets the same value as argument in `mean()`, `var()` and `sd()`. If we want to remove missing values in all these functions to get a result in case of having missing values, we can use the second parameter by position, like `meanVarSdSe(x, TRUE)`, or by name, like `meanVarSdSe(x, na.rm = TRUE)`. We just have to be aware of `length(x)` in this case. If we want to have the same result as above we have to remove the sum of `NA` values from the length of `x`. Otherwise the function will calculate a different result than in Part I, because then lentgh differs.
+
+Lets confirm the result:
+
+```{r meanVarSdSeImproveTest}
+meanVarSdSe(c(x, NA), na.rm = TRUE)
+```
+
 #### Part III
 
 ### Functions III
