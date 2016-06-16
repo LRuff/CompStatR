@@ -23,6 +23,33 @@ knitr::opts_chunk$set(echo = TRUE,
 
 ### Functions I
 
+Below we define a function `dropNa` which given an atomic vector `x` as argument, returns `x` after removing missing values.
+
+```{r dropNa}
+dropNa <- function(x) {
+  # expects an atomic vector as an argument and returns it without missing
+  # values
+  # 
+  # Args:
+  #   x: atomic vector
+  #
+  # Returns:
+  #   The atomic vector x without missing values
+  
+  # To remove the NAs, we use simple logical subsetting
+  y <- x[!is.na(x)]
+  y
+}
+```
+
+Let's test our implementation with the following line of code:
+
+```{r dropNaTest}
+all.equal(dropNa(c(1, 2, 3, NA, 1, 2, 3)), c(1, 2, 3, 1, 2, 3))
+```
+
+As we can see from this positive test, our implementation was successful.
+
 ### Functions II
 
 ### Functions III
