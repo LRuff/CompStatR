@@ -1,0 +1,555 @@
+\documentclass[11,]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+  \newcommand{\euro}{€}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\PassOptionsToPackage{usenames,dvipsnames}{color} % color is loaded by hyperref
+\hypersetup{unicode=true,
+            pdftitle={CompStat/R - Paper 2},
+            pdfauthor={Group 2: Carlo Michaelis, Patrick Molligo, Lukas Ruff},
+            pdfborder={0 0 0},
+            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{{#1}}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{{#1}}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{{#1}}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{{#1}}}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{{#1}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{{#1}}}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{{#1}}}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{{#1}}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{{#1}}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{{#1}}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{{#1}}}
+\newcommand{\ImportTok}[1]{{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{{#1}}}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{{#1}}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{{#1}}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{{#1}}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{{#1}}}}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{{#1}}}}
+\newcommand{\BuiltInTok}[1]{{#1}}
+\newcommand{\ExtensionTok}[1]{{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{{#1}}}
+\newcommand{\RegionMarkerTok}[1]{{#1}}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{{#1}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{{#1}}}}
+\newcommand{\NormalTok}[1]{{#1}}
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+
+%%% Use protect on footnotes to avoid problems with footnotes in titles
+\let\rmarkdownfootnote\footnote%
+\def\footnote{\protect\rmarkdownfootnote}
+
+%%% Change title format to be more compact
+\usepackage{titling}
+
+% Create subtitle command for use in maketitle
+\newcommand{\subtitle}[1]{
+  \posttitle{
+    \begin{center}\large#1\end{center}
+    }
+}
+
+\setlength{\droptitle}{-2em}
+  \title{CompStat/R - Paper 2}
+  \pretitle{\vspace{\droptitle}\centering\huge}
+  \posttitle{\par}
+  \author{Group 2: Carlo Michaelis, Patrick Molligo, Lukas Ruff}
+  \preauthor{\centering\large\emph}
+  \postauthor{\par}
+  \predate{\centering\large\emph}
+  \postdate{\par}
+  \date{21 June 2016}
+
+
+
+% Redefines (sub)paragraphs to behave more like sections
+\ifx\paragraph\undefined\else
+\let\oldparagraph\paragraph
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+\let\oldsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+\begin{document}
+\maketitle
+
+\subsection{Part I: Functions}\label{part-i-functions}
+
+\subsubsection{Functions I}\label{functions-i}
+
+Below we define a function \texttt{dropNa} which, given an atomic vector
+\texttt{x} as an argument, returns \texttt{x} after removing missing
+values.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{dropNa <-}\StringTok{ }\NormalTok{function(x) \{}
+  \CommentTok{# Expects an atomic vector as an argument and returns it without missing}
+  \CommentTok{# values}
+  \CommentTok{# }
+  \CommentTok{# Args:}
+  \CommentTok{#   x: atomic vector}
+  \CommentTok{#}
+  \CommentTok{# Returns:}
+  \CommentTok{#   The atomic vector x without missing values}
+  
+  \CommentTok{# To remove the NAs, we use simple logical subsetting}
+  \NormalTok{y <-}\StringTok{ }\NormalTok{x[!}\KeywordTok{is.na}\NormalTok{(x)]}
+  
+  \CommentTok{# Return y}
+  \NormalTok{y}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+Let's test our implementation with the following line of code:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{all.equal}\NormalTok{(}\KeywordTok{dropNa}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{2}\NormalTok{, }\DecValTok{3}\NormalTok{, }\OtherTok{NA}\NormalTok{, }\DecValTok{1}\NormalTok{, }\DecValTok{2}\NormalTok{, }\DecValTok{3}\NormalTok{)), }\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{2}\NormalTok{, }\DecValTok{3}\NormalTok{, }\DecValTok{1}\NormalTok{, }\DecValTok{2}\NormalTok{, }\DecValTok{3}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] TRUE
+\end{verbatim}
+
+As we can see from this positive test, our implementation was
+successful.
+
+\subsubsection{Functions II}\label{functions-ii}
+
+\paragraph{Part I}\label{part-i}
+
+Below we define a function \texttt{meanVarSdSe} which, given a numeric
+vector \texttt{x} as an argument, returns the mean, the variance, the
+standard deviation and the standard error of \texttt{x}.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{meanVarSdSe <-}\StringTok{ }\NormalTok{function(x) \{}
+  \CommentTok{# Expects a numeric vector as an argument and returns the mean,}
+  \CommentTok{# the variance, the standard deviation and the standard error}
+  \CommentTok{# }
+  \CommentTok{# Args:}
+  \CommentTok{#   x: numeric vector}
+  \CommentTok{#}
+  \CommentTok{# Returns:}
+  \CommentTok{#   a numerical vector containing mean, variance, standard deviation}
+  \CommentTok{#   and standard error of x}
+  
+  \CommentTok{# We check if x is numeric vector}
+  \CommentTok{# If not: stop and throw error}
+  \NormalTok{if( !}\KeywordTok{is.numeric}\NormalTok{(x) ) \{}
+    \KeywordTok{stop}\NormalTok{(}\StringTok{"Argument needs to be numeric."}\NormalTok{)}
+  \NormalTok{\}}
+  
+  \CommentTok{# Create vector object}
+  \NormalTok{y <-}\StringTok{ }\KeywordTok{vector}\NormalTok{()}
+  
+  \CommentTok{# Calculate mean, variance, standard deviation and standard error}
+  \CommentTok{# and save it in y}
+  \NormalTok{y[}\DecValTok{1}\NormalTok{] <-}\StringTok{ }\KeywordTok{mean}\NormalTok{(x)}
+  \NormalTok{y[}\DecValTok{2}\NormalTok{] <-}\StringTok{ }\KeywordTok{var}\NormalTok{(x)}
+  \NormalTok{y[}\DecValTok{3}\NormalTok{] <-}\StringTok{ }\KeywordTok{sd}\NormalTok{(x)}
+  \NormalTok{y[}\DecValTok{4}\NormalTok{] <-}\StringTok{ }\NormalTok{y[}\DecValTok{3}\NormalTok{]/}\KeywordTok{sqrt}\NormalTok{(}\KeywordTok{length}\NormalTok{(x))}
+  
+  \CommentTok{# Set names to vector entries}
+  \KeywordTok{names}\NormalTok{(y) <-}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"mean"}\NormalTok{, }\StringTok{"var"}\NormalTok{, }\StringTok{"sd"}\NormalTok{, }\StringTok{"se"}\NormalTok{)}
+  
+  \CommentTok{# Return the numeric vector y}
+  \NormalTok{y}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+To test the function, we define a numeric vector, which contains numbers
+from \(1\) to \(100\), and use it as an argument for our function
+\texttt{meanVarSdSe}:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{x <-}\StringTok{ }\DecValTok{1}\NormalTok{:}\DecValTok{100}
+\KeywordTok{meanVarSdSe}\NormalTok{(x)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##       mean        var         sd         se 
+##  50.500000 841.666667  29.011492   2.901149
+\end{verbatim}
+
+Finally we can confirm that the result is of class \texttt{numeric}:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{class}\NormalTok{(}\KeywordTok{meanVarSdSe}\NormalTok{(x))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "numeric"
+\end{verbatim}
+
+\paragraph{Part II}\label{part-ii}
+
+Now we will have a look at the case below. We would expect that the
+function will return a vector with \texttt{NA}s:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{x <-}\StringTok{ }\KeywordTok{c}\NormalTok{(}\OtherTok{NA}\NormalTok{, }\DecValTok{1}\NormalTok{:}\DecValTok{100}\NormalTok{)}
+\KeywordTok{meanVarSdSe}\NormalTok{(x)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## mean  var   sd   se 
+##   NA   NA   NA   NA
+\end{verbatim}
+
+The reason for the result is that the functions \texttt{mean()},
+\texttt{var()} and \texttt{sd()} use \texttt{na.rm\ =\ FALSE} as
+default, which means that missing values are not removed. If the vector
+\texttt{x} contains a missing value, the \texttt{mean()} function (as
+well as \texttt{var()} and \texttt{sd()}) will just return \texttt{NA}
+to inform about missing values. In the case of calculating standard
+error we use the result from our \texttt{sd()} function and calculate an
+\texttt{NA} value with some other numeric values, which will ultimately
+result in \texttt{NA} again.
+
+To solve the problem, we can add \texttt{na.rm\ =\ TRUE} to these three
+functions. To make this optional, we will improve the
+\texttt{meanVarSdSe} function from above as follows:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{meanVarSdSe <-}\StringTok{ }\NormalTok{function(x, ...) \{}
+  \CommentTok{# Expects a numeric vector and flag to handle missing values as an argument}
+  \CommentTok{# and returns the mean, the variance, the standard deviation}
+  \CommentTok{# and the standard error}
+  \CommentTok{# }
+  \CommentTok{# Args:}
+  \CommentTok{#   x: numeric vector, na.rm: boolean}
+  \CommentTok{#}
+  \CommentTok{# Returns:}
+  \CommentTok{#   a numerical vector containing mean, variance, standard deviation}
+  \CommentTok{#   and standard error of x}
+  
+  \CommentTok{# We check if x is numeric vector}
+  \CommentTok{# If not: stop and throw error}
+  \NormalTok{if( !}\KeywordTok{is.numeric}\NormalTok{(x) ) \{}
+    \KeywordTok{stop}\NormalTok{(}\StringTok{"Argument needs to be numeric."}\NormalTok{)}
+  \NormalTok{\}}
+  
+  \CommentTok{# Create vector object}
+  \NormalTok{y <-}\StringTok{ }\KeywordTok{vector}\NormalTok{()}
+  
+  \CommentTok{# Calculate mean, variance, standard deviation and standard error}
+  \CommentTok{# and save it in y}
+  \NormalTok{y[}\DecValTok{1}\NormalTok{] <-}\StringTok{ }\KeywordTok{mean}\NormalTok{(x, ...)}
+  \NormalTok{y[}\DecValTok{2}\NormalTok{] <-}\StringTok{ }\KeywordTok{var}\NormalTok{(x, ...)}
+  \NormalTok{y[}\DecValTok{3}\NormalTok{] <-}\StringTok{ }\KeywordTok{sd}\NormalTok{(x, ...)}
+  \NormalTok{y[}\DecValTok{4}\NormalTok{] <-}\StringTok{ }\NormalTok{y[}\DecValTok{3}\NormalTok{]/}\KeywordTok{sqrt}\NormalTok{(}\KeywordTok{length}\NormalTok{(x) -}\StringTok{ }\KeywordTok{sum}\NormalTok{(}\KeywordTok{is.na}\NormalTok{(x)))}
+  
+  \CommentTok{# Set names to vector entries}
+  \KeywordTok{names}\NormalTok{(y) <-}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"mean"}\NormalTok{, }\StringTok{"var"}\NormalTok{, }\StringTok{"sd"}\NormalTok{, }\StringTok{"se"}\NormalTok{)}
+  
+  \CommentTok{# Return the numeric vector y}
+  \NormalTok{y}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+We define the function with an ellipse \texttt{...}. Our function can
+now receive multiple arguments after the first input \texttt{x}. These
+arguments are used in \texttt{mean()}, \texttt{var()} and \texttt{sd()}.
+If we want to remove missing values in all of these functions (to get a
+result in the case of missing values), we can pass
+\texttt{na.rm\ =\ TRUE} as another argument, such as here:
+\texttt{meanVarSdSe(x,\ na.rm\ =\ TRUE)}. We just have to be aware of
+\texttt{length(x)} in this case. If we want to have the same result as
+above we have to remove the sum of \texttt{NA} values from the length of
+\texttt{x}. Otherwise the function will calculate a different result
+than in Part I, because then lentgh differs.
+
+Let's confirm the result:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{meanVarSdSe}\NormalTok{(}\KeywordTok{c}\NormalTok{(x, }\OtherTok{NA}\NormalTok{), }\DataTypeTok{na.rm =} \OtherTok{TRUE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##       mean        var         sd         se 
+##  50.500000 841.666667  29.011492   2.901149
+\end{verbatim}
+
+\paragraph{Part III}\label{part-iii}
+
+Now we will use the function \texttt{dropNa} from Functions I to deal
+with missing values in \texttt{meanVarSdSe}.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{meanVarSdSe <-}\StringTok{ }\NormalTok{function(x) \{}
+  \CommentTok{# Expects a numeric vector as an argument and returns the mean,}
+  \CommentTok{# the variance, the standard deviation and the standard error}
+  \CommentTok{# it also removes missing values if x contains some}
+  \CommentTok{# }
+  \CommentTok{# Args:}
+  \CommentTok{#   x: numeric vector}
+  \CommentTok{#}
+  \CommentTok{# Returns:}
+  \CommentTok{#   a numerical vector containing mean, variance, standard deviation}
+  \CommentTok{#   and standard error of x}
+  
+  \CommentTok{# We check if x is numeric vector}
+  \CommentTok{# If not: stop and throw error}
+  \NormalTok{if( !}\KeywordTok{is.numeric}\NormalTok{(x) ) \{}
+    \KeywordTok{stop}\NormalTok{(}\StringTok{"Argument needs to be numeric."}\NormalTok{)}
+  \NormalTok{\}}
+  
+  \CommentTok{# We check if x contains missing values}
+  \CommentTok{# If so: remove missing values using dropNA}
+  \NormalTok{if( }\KeywordTok{sum}\NormalTok{(}\KeywordTok{is.na}\NormalTok{(x)) >}\StringTok{ }\DecValTok{0} \NormalTok{) \{}
+    \NormalTok{x <-}\StringTok{ }\KeywordTok{dropNa}\NormalTok{(x)}
+  \NormalTok{\}}
+  
+  \CommentTok{# Create vector object}
+  \NormalTok{y <-}\StringTok{ }\KeywordTok{vector}\NormalTok{()}
+  
+  \CommentTok{# Calculate mean, variance, standard deviation and standard error}
+  \CommentTok{# and save it in y}
+  \NormalTok{y[}\DecValTok{1}\NormalTok{] <-}\StringTok{ }\KeywordTok{mean}\NormalTok{(x)}
+  \NormalTok{y[}\DecValTok{2}\NormalTok{] <-}\StringTok{ }\KeywordTok{var}\NormalTok{(x)}
+  \NormalTok{y[}\DecValTok{3}\NormalTok{] <-}\StringTok{ }\KeywordTok{sd}\NormalTok{(x)}
+  \NormalTok{y[}\DecValTok{4}\NormalTok{] <-}\StringTok{ }\NormalTok{y[}\DecValTok{3}\NormalTok{]/}\KeywordTok{sqrt}\NormalTok{(}\KeywordTok{length}\NormalTok{(x))}
+  
+  \CommentTok{# Set names to vector entries}
+  \KeywordTok{names}\NormalTok{(y) <-}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"mean"}\NormalTok{, }\StringTok{"var"}\NormalTok{, }\StringTok{"sd"}\NormalTok{, }\StringTok{"se"}\NormalTok{)}
+  
+  \CommentTok{# Return the numeric vector y}
+  \NormalTok{y}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+We used the function from Part I and added a condition which checks if
+we have missing values in \texttt{x}, using \texttt{is.na}. If the sum
+of \texttt{NA} values is greater than \(0\) (i.e.,if there is one or
+more missing value), we use the function \texttt{dropNA} from the first
+exercise to remove all missing values. The remaining code of the
+function can remain as above in Part I.
+
+We can confirm the result:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{meanVarSdSe}\NormalTok{(}\KeywordTok{c}\NormalTok{(x, }\OtherTok{NA}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##       mean        var         sd         se 
+##  50.500000 841.666667  29.011492   2.901149
+\end{verbatim}
+
+\subsubsection{Functions III}\label{functions-iii}
+
+In this section we define an infix function \texttt{\%or\%}. This
+function should behave like the logical operator \texttt{\textbar{}}.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Define infix function %or%}
+\StringTok{`}\DataTypeTok{%or%}\StringTok{`} \NormalTok{<-}\StringTok{ }\NormalTok{function(a, b) \{}
+  \CommentTok{# Check if vector a and b is logical}
+  \NormalTok{if( !(}\KeywordTok{is.logical}\NormalTok{(a) &}\StringTok{ }\KeywordTok{is.logical}\NormalTok{(b)) ) \{}
+    \KeywordTok{stop}\NormalTok{(}\StringTok{"a and/or b have to be logical vectors."}\NormalTok{)}
+  \NormalTok{\}}
+  
+  \CommentTok{# Use ifelse to calculate result and return it directly}
+  \CommentTok{# If the sum of the entry of vector a and the entry of vector b}
+  \CommentTok{# is greater than or equal to 1, set result to TRUE, otherwise to FALSE}
+  \KeywordTok{ifelse}\NormalTok{(a +}\StringTok{ }\NormalTok{b >=}\StringTok{ }\DecValTok{1}\NormalTok{,  }\OtherTok{TRUE}\NormalTok{, }\OtherTok{FALSE}\NormalTok{)}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+First we check if we have logical vectors. If \texttt{a} and/or
+\texttt{b} are not logical, we leave the function and throw an error.
+Otherwise we can calculate the \texttt{or} operation using the
+\texttt{ifelse} function and return the result directly after
+calculation. Inside of the \texttt{ifelse} function, the first argument
+checks the condition if the sum of the values \texttt{a} and \texttt{b}
+are greater than or equal to \(1\), where \texttt{TRUE} is equal to
+\(1\) and \texttt{FALSE} is equal to \(0\).
+
+To confirm the function, we test an example:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{c}\NormalTok{(}\OtherTok{TRUE}\NormalTok{, }\OtherTok{FALSE}\NormalTok{, }\OtherTok{TRUE}\NormalTok{, }\OtherTok{FALSE}\NormalTok{) %or%}\StringTok{ }\KeywordTok{c}\NormalTok{(}\OtherTok{TRUE}\NormalTok{, }\OtherTok{TRUE}\NormalTok{, }\OtherTok{FALSE}\NormalTok{, }\OtherTok{FALSE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1]  TRUE  TRUE  TRUE FALSE
+\end{verbatim}
+
+\subsection{Part II: Scoping and related
+topics}\label{part-ii-scoping-and-related-topics}
+
+\subsubsection{Scoping I}\label{scoping-i}
+
+The main concept behind this exercise is that of the \emph{Search Path},
+which \texttt{R} uses to locate objects when called upon. In order for
+\texttt{R} to carry out a command or calculation, it seeks the necessary
+information according to a hierarchical path of ``environments''. Each
+environment has a ``parent'' environment, to which \texttt{R} moves if
+the required information is not yet found. The \texttt{R} workspace is
+known as the \emph{Global Environment} and also has a parent, which is
+either the most recently loaded package or the base package
+(\texttt{package:base}), also known as the ``end'' of the search path.
+
+Below we can observe the importance of the search path with a simple
+example:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# We assign numeric values to the vectors x and y in the workspace }
+\CommentTok{# which we call the global environment}
+\NormalTok{x <-}\StringTok{ }\DecValTok{5}
+\NormalTok{y <-}\StringTok{ }\DecValTok{7}
+
+\NormalTok{f <-}\StringTok{ }\NormalTok{function() x *}\StringTok{ }\NormalTok{y}
+  \CommentTok{# With no specified argument inputs, the function f follows the search path}
+  \CommentTok{# and locates values for x and y in the global environment}
+\NormalTok{g <-}\StringTok{ }\NormalTok{function(}\DataTypeTok{x =} \DecValTok{2}\NormalTok{, }\DataTypeTok{y =} \NormalTok{x) x *}\StringTok{ }\NormalTok{y}
+  \CommentTok{# A new environment is created within the function g, where arguments for x and y}
+  \CommentTok{# are clearly defined}
+\end{Highlighting}
+\end{Shaded}
+
+Although both functions \texttt{f} and \texttt{g} depend on values for
+\texttt{x} and \texttt{y}, they return different results when called:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{f}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 35
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{g}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 4
+\end{verbatim}
+
+Beginning with function \texttt{f}, if we follow the search path we
+begin in the environment within the function itself. Since there is no
+information regarding the values of \texttt{x} and \texttt{y},
+\texttt{R} moves to the parent environment, which is the global
+environment in this case. In the global environment, \texttt{x} takes
+the value of \(5\) and \texttt{y} takes the value of \(7\). Thus, the
+function returns \(5*7=35\).\\
+For function \texttt{g} the search path also begins in the environment
+within the function itself. However, in this case there is a defined
+value for \texttt{x}, as well as an expression defining a value for
+\texttt{y} based on \texttt{x}. The search path ends and the function
+returns \(2*2=4\).
+
+By manipulating the arguments of a function, it is also possible to
+alter the original search path. We see this when calling the following
+function:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{g}\NormalTok{(}\DataTypeTok{y =} \NormalTok{x)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 10
+\end{verbatim}
+
+Looking back at the code for function \texttt{g}, we see the two
+arguments \texttt{x} and \texttt{y}. When calling \texttt{g(y\ =\ x)}
+however, we are ignoring the first argument, which then defaults to the
+value \(2\). When we simply call \texttt{g()}, the \texttt{y\ =\ x}
+argument also defaults to a value dependent on \texttt{x}. But by
+inputing \texttt{y\ =\ x} manually, we send the search path to the
+global environment where \texttt{x} takes the value of \(5\). Thus the
+function returns \(2*5=10\).
+
+\subsubsection{Scoping II}\label{scoping-ii}
+
+\subsubsection{Scoping III}\label{scoping-iii}
+
+\subsubsection{Dynamic lookup}\label{dynamic-lookup}
+
+\end{document}

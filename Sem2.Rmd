@@ -23,11 +23,11 @@ knitr::opts_chunk$set(echo = TRUE,
 
 ### Functions I
 
-Below we define a function `dropNa` which given an atomic vector `x` as argument, returns `x` after removing missing values.
+Below we define a function `dropNa` which, given an atomic vector `x` as an argument, returns `x` after removing missing values.
 
 ```{r dropNa}
 dropNa <- function(x) {
-  # expects an atomic vector as an argument and returns it without missing
+  # Expects an atomic vector as an argument and returns it without missing
   # values
   # 
   # Args:
@@ -56,11 +56,11 @@ As we can see from this positive test, our implementation was successful.
 
 #### Part I
 
-Below we define a function `meanVarSdSe` which given a numeric vector `x` as argument, returns the mean, the variance, the standard deviation and the standard error of `x`.
+Below we define a function `meanVarSdSe` which, given a numeric vector `x` as an argument, returns the mean, the variance, the standard deviation and the standard error of `x`.
 
 ```{r meanVarSdSe}
 meanVarSdSe <- function(x) {
-  # expects a numeric vector as an argument and returns the mean,
+  # Expects a numeric vector as an argument and returns the mean,
   # the variance, the standard deviation and the standard error
   # 
   # Args:
@@ -73,7 +73,7 @@ meanVarSdSe <- function(x) {
   # We check if x is numeric vector
   # If not: stop and throw error
   if( !is.numeric(x) ) {
-    stop("Argument need to be numeric.")
+    stop("Argument needs to be numeric.")
   }
   
   # Create vector object
@@ -94,14 +94,14 @@ meanVarSdSe <- function(x) {
 }
 ```
 
-To test the function, we define a numeric vector, which contains numbers from $1$ to $100$ and use it as an argument for our function `meanVarSdSe`:
+To test the function, we define a numeric vector, which contains numbers from $1$ to $100$, and use it as an argument for our function `meanVarSdSe`:
 
 ```{r meanVarSdSeTest}
 x <- 1:100
 meanVarSdSe(x)
 ```
 
-Finally we can confirm, that the result is of type `numeric`:
+Finally we can confirm that the result is of class `numeric`:
 
 ```{r meanVarSdSeTest2}
 class(meanVarSdSe(x))
@@ -116,13 +116,13 @@ x <- c(NA, 1:100)
 meanVarSdSe(x)
 ```
 
-The reason for the result is that the functions `mean()`, `var()` and `sd()` use `na.rm = FALSE` as default, which means that missing values are not removed. If the vector `x` contains a missing value, the `mean()` function (`var()` and `sd()` respectively) will just return `NA` to inform about missing values. In the case of calculating standard error we use the result from our `sd()` function and calculate a `NA` value with some other numeric values, which will results in `NA` again.
+The reason for the result is that the functions `mean()`, `var()` and `sd()` use `na.rm = FALSE` as default, which means that missing values are not removed. If the vector `x` contains a missing value, the `mean()` function (as well as `var()` and `sd()`) will just return `NA` to inform about missing values. In the case of calculating standard error we use the result from our `sd()` function and calculate an `NA` value with some other numeric values, which will ultimately result in `NA` again.
 
-To solve the problem, we should can add `na.rm = TRUE` to those three functions. To make this optionally, we will improve the `meanVarSdSe` function from above as follows:
+To solve the problem, we can add `na.rm = TRUE` to these three functions. To make this optional, we will improve the `meanVarSdSe` function from above as follows:
 
 ```{r meanVarSdSeImprove}
 meanVarSdSe <- function(x, ...) {
-  # expects a numeric vector and flag to handle missing values as an argument
+  # Expects a numeric vector and flag to handle missing values as an argument
   # and returns the mean, the variance, the standard deviation
   # and the standard error
   # 
@@ -136,7 +136,7 @@ meanVarSdSe <- function(x, ...) {
   # We check if x is numeric vector
   # If not: stop and throw error
   if( !is.numeric(x) ) {
-    stop("Argument need to be numeric.")
+    stop("Argument needs to be numeric.")
   }
   
   # Create vector object
@@ -157,9 +157,9 @@ meanVarSdSe <- function(x, ...) {
 }
 ```
 
-We define the function with an ellipse `...`. Our function can now get multiple arguments after the first `x`. These arguments are used in `mean()`, `var()` and `sd()`. If we want to remove missing values in all these functions (to get a result in case of having missing values), we can pass `na.rm = TRUE` as another argument, like `meanVarSdSe(x, na.rm = TRUE)`. We just have to be aware of `length(x)` in this case. If we want to have the same result as above we have to remove the sum of `NA` values from the length of `x`. Otherwise the function will calculate a different result than in Part I, because then lentgh differs.
+We define the function with an ellipse `...`. Our function can now receive multiple arguments after the first input `x`. These arguments are used in `mean()`, `var()` and `sd()`. If we want to remove missing values in all of these functions (to get a result in the case of missing values), we can pass `na.rm = TRUE` as another argument, such as here: `meanVarSdSe(x, na.rm = TRUE)`. We just have to be aware of `length(x)` in this case. If we want to have the same result as above we have to remove the sum of `NA` values from the length of `x`. Otherwise the function will calculate a different result than in Part I, because then lentgh differs.
 
-Lets confirm the result:
+Let's confirm the result:
 
 ```{r meanVarSdSeImproveTest}
 meanVarSdSe(c(x, NA), na.rm = TRUE)
@@ -171,7 +171,7 @@ Now we will use the function `dropNa` from Functions I to deal with missing valu
 
 ```{r meanVarSdSeDrop}
 meanVarSdSe <- function(x) {
-  # expects a numeric vector as an argument and returns the mean,
+  # Expects a numeric vector as an argument and returns the mean,
   # the variance, the standard deviation and the standard error
   # it also removes missing values if x contains some
   # 
@@ -185,7 +185,7 @@ meanVarSdSe <- function(x) {
   # We check if x is numeric vector
   # If not: stop and throw error
   if( !is.numeric(x) ) {
-    stop("Argument need to be numeric.")
+    stop("Argument needs to be numeric.")
   }
   
   # We check if x contains missing values
@@ -212,7 +212,7 @@ meanVarSdSe <- function(x) {
 }
 ```
 
-We used the function from Part I and added a condition which checks if we have missing values in `x`, using `is.na`. If the sum of `NA` values is greater than $0$ (if there is one or more missing value), we use the function `dropNA` from the beginning to remove all missing values. The remaining code of the function can stay like above in Part I.
+We used the function from Part I and added a condition which checks if we have missing values in `x`, using `is.na`. If the sum of `NA` values is greater than $0$ (i.e.,if there is one or more missing value), we use the function `dropNA` from the first exercise to remove all missing values. The remaining code of the function can remain as above in Part I.
 
 We can confirm the result:
 
@@ -233,13 +233,13 @@ In this section we define an infix function `%or%`. This function should behave 
   }
   
   # Use ifelse to calculate result and return it directly
-  # If the sum of entry of vector a and entry of vector b
-  # is greater or equal to 1, set result to TRUE, otherweise to FALSE
+  # If the sum of the entry of vector a and the entry of vector b
+  # is greater than or equal to 1, set result to TRUE, otherwise to FALSE
   ifelse(a + b >= 1,  TRUE, FALSE)
 }
 ```
 
-First we check if we have logical vectors. If `a` and/or `b` are not logical, we leave the function and throw an error. Otherwise we can calculate the `or` operation using `ifelse` function and return the result directly after calculation. Inside of the `ifelse` function, the first argument checks the condition if the sum of the values `a` and `b` are greater or qual to $1$, where `TRUE` equals to $1$ and `FALSE` quals to $0$.
+First we check if we have logical vectors. If `a` and/or `b` are not logical, we leave the function and throw an error. Otherwise we can calculate the `or` operation using the `ifelse` function and return the result directly after calculation. Inside of the `ifelse` function, the first argument checks the condition if the sum of the values `a` and `b` are greater than or equal to $1$, where `TRUE` is equal to $1$ and `FALSE` is equal to $0$.
 
 To confirm the function, we test an example:
 
@@ -250,6 +250,44 @@ c(TRUE, FALSE, TRUE, FALSE) %or% c(TRUE, TRUE, FALSE, FALSE)
 ## Part II: Scoping and related topics
 
 ### Scoping I
+
+The main concept behind this exercise is that of the *Search Path*, which `R` uses to locate objects when called upon. In order for `R` to carry out a command or calculation, it seeks the necessary information according to a hierarchical path of "environments". Each environment has a "parent" environment, to which `R` moves if the required information is not yet found. The `R` workspace is known as the *Global Environment* and also has a parent, which is either the most recently loaded package or the base package (`package:base`), also known as the "end" of the search path.  
+
+Below we can observe the importance of the search path with a simple example:  
+
+```{r searchPath}
+# We assign numeric values to the vectors x and y in the workspace 
+# which we call the global environment
+x <- 5
+y <- 7
+
+f <- function() x * y
+  # With no specified argument inputs, the function f follows the search path
+  # and locates values for x and y in the global environment
+g <- function(x = 2, y = x) x * y
+  # A new environment is created within the function g, where arguments for x and y
+  # are clearly defined
+```
+
+Although both functions `f` and `g` depend on values for `x` and `y`, they return different results when called:  
+
+```{r searchPathCalls}
+f()
+g()
+```
+
+Beginning with function `f`, if we follow the search path we begin in the environment within the function itself. Since there is no information regarding the values of `x` and `y`, `R` moves to the parent environment, which is the global environment in this case. In the global environment, `x` takes the value of $5$ and `y` takes the value of $7$. Thus, the function returns $5*7=35$.  
+For function `g` the search path also begins in the environment within the function itself. However, in this case there is a defined value for `x`, as well as an expression defining a value for `y` based on `x`. The search path ends and the function returns $2*2=4$.  
+
+By manipulating the arguments of a function, it is also possible to alter the original search path. We see this when calling the following function:
+
+```{r searchPathAlter}
+g(y = x)
+```
+
+Looking back at the code for function `g`, we see the two arguments `x` and `y`. When calling `g(y = x)` however, we are ignoring the first argument, which then defaults to the value $2$. When we simply call `g()`, the `y = x` argument also defaults to a value dependent on `x`. But by inputing `y = x` manually, we send the search path to the global environment where `x` takes the value of $5$. Thus the function returns $2*5=10$.   
+
+
 
 ### Scoping II
 
