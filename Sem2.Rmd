@@ -38,6 +38,8 @@ dropNa <- function(x) {
   
   # To remove the NAs, we use simple logical subsetting
   y <- x[!is.na(x)]
+  
+  # Return y
   y
 }
 ```
@@ -51,6 +53,62 @@ all.equal(dropNa(c(1, 2, 3, NA, 1, 2, 3)), c(1, 2, 3, 1, 2, 3))
 As we can see from this positive test, our implementation was successful.
 
 ### Functions II
+
+#### Part I
+
+Below we define a function `meanVarSdSe` which given a numeric vector `x` as argument, returns the mean, the variance, the standard deviation and the standard error of `x`.
+
+```{r meanVarSdSe}
+meanVarSdSe <- function(x) {
+  # expects a numeric vector as an argument and returns the mean,
+  # the variance, the standard deviation and the standard error
+  # 
+  # Args:
+  #   x: numeric vector
+  #
+  # Returns:
+  #   a numerical vector containing mean, variance, standard deviation
+  #   and standard error of x
+  
+  # First we check if we have a numerical vector
+  # If not: stop and throw error
+  if( !is.numeric(x) )
+    stop("Argument need to be numeric.")
+  
+  # Create vector object
+  y <- vector()
+  
+  # Calculate mean, variance, standard deviation and standard error
+  # and save it in y
+  y[1] <- mean(x)
+  y[2] <- var(x)
+  y[3] <- sd(x)
+  y[4] <- y[3]/sqrt(length(x))
+  
+  # Set names to vector entries
+  names(y) <- c("mean", "var", "sd", "se")
+  
+  # Return the numeric vector y
+  y
+}
+```
+
+To test the function, we define a numeric vector, which contains numbers from $1$ to $100$ and use it as an argument for our function `meanVarSdSe`:
+
+```{r meanVarSdSeTest}
+x <- 1:100
+meanVarSdSe(x)
+```
+
+Finally we can confirm, that the result is of type `numeric`:
+
+```{r meanVarSdSeTest2}
+class(meanVarSdSe(x))
+```
+
+#### Part II
+
+#### Part III
 
 ### Functions III
 
