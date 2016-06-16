@@ -121,7 +121,7 @@ The reason for the result is that the functions `mean()`, `var()` and `sd()` use
 To solve the problem, we should can add `na.rm = TRUE` to those three functions. To make this optionally, we will improve the `meanVarSdSe` function from above as follows:
 
 ```{r meanVarSdSeImprove}
-meanVarSdSe <- function(x, na.rm = FALSE) {
+meanVarSdSe <- function(x, ...) {
   # expects a numeric vector and flag to handle missing values as an argument
   # and returns the mean, the variance, the standard deviation
   # and the standard error
@@ -144,14 +144,10 @@ meanVarSdSe <- function(x, na.rm = FALSE) {
   
   # Calculate mean, variance, standard deviation and standard error
   # and save it in y
-  y[1] <- mean(x, na.rm = na.rm)
-  y[2] <- var(x, na.rm = na.rm)
-  y[3] <- sd(x, na.rm = na.rm)
-  if( na.rm == FALSE ) {
-    y[4] <- y[3]/sqrt(length(x))
-  } else {
-    y[4] <- y[3]/sqrt(length(x) - sum(is.na(x)))
-  }
+  y[1] <- mean(x, ...)
+  y[2] <- var(x, ...)
+  y[3] <- sd(x, ...)
+  y[4] <- y[3]/sqrt(length(x) - sum(is.na(x)))
   
   # Set names to vector entries
   names(y) <- c("mean", "var", "sd", "se")
@@ -161,7 +157,7 @@ meanVarSdSe <- function(x, na.rm = FALSE) {
 }
 ```
 
-We define the function with a second argument `na.rm` which has the default value `FALSE`. If we just give one argument, like `meanVarSdSe(x)` the function will take `na.rm = FALSE` for us and respectivly sets the same value as argument in `mean()`, `var()` and `sd()`. If we want to remove missing values in all these functions to get a result in case of having missing values, we can use the second parameter by position, like `meanVarSdSe(x, TRUE)`, or by name, like `meanVarSdSe(x, na.rm = TRUE)`. We just have to be aware of `length(x)` in this case. If we want to have the same result as above we have to remove the sum of `NA` values from the length of `x`. Otherwise the function will calculate a different result than in Part I, because then lentgh differs.
+We define the function with an ellipse `...`. Our function can now get multiple arguments after the first `x`. These arguments are used in `mean()`, `var()` and `sd()`. If we want to remove missing values in all these functions (to get a result in case of having missing values), we can pass `na.rm = TRUE` as another argument, like `meanVarSdSe(x, na.rm = TRUE)`. We just have to be aware of `length(x)` in this case. If we want to have the same result as above we have to remove the sum of `NA` values from the length of `x`. Otherwise the function will calculate a different result than in Part I, because then lentgh differs.
 
 Lets confirm the result:
 
@@ -226,7 +222,30 @@ meanVarSdSe(c(x, NA))
 
 ### Functions III
 
+In this section we define an infix function `%or%`. This function should behave like the logical operator `|`.
 
+```{r infixOr}
+# Define infix function %or%
+`%or%` <- function(a, b) {
+  # Check if vector a and b is logical
+  if( !(is.logical(a) & is.logical(b)) ) {
+    stop("a and/or b have to be logical vectors.")
+  }
+  
+  # Use ifelse to calculate result and return it directly
+  # If the sum of entry of vector a and entry of vector b
+  # is greater or equal to 1, set result to TRUE, otherweise to FALSE
+  ifelse(a + b >= 1,  TRUE, FALSE)
+}
+```
+
+First we check if we have logical vectors. If `a` and/or `b` are not logical, we leave the function and throw an error. Otherwise we can calculate the `or` operation using `ifelse` function and return the result directly after calculation. Inside of the `ifelse` function, the first argument checks the condition if the sum of the values `a` and `b` are greater or qual to $1$, where `TRUE` equals to $1$ and `FALSE` quals to $0$.
+
+To confirm the function, we test an example:
+
+```{r infixOrTest}
+c(TRUE, FALSE, TRUE, FALSE) %or% c(TRUE, TRUE, FALSE, FALSE)
+```
 
 ## Part II: Scoping and related topics
 
