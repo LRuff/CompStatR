@@ -9,10 +9,11 @@
 \else % if luatex or xelatex
   \ifxetex
     \usepackage{mathspec}
+    \usepackage{xltxtra,xunicode}
   \else
     \usepackage{fontspec}
   \fi
-  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+  \defaultfontfeatures{Mapping=tex-text,Scale=MatchLowercase}
   \newcommand{\euro}{€}
 \fi
 % use upquote if available, for straight quotes in verbatim environments
@@ -23,14 +24,6 @@
 \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
 }{}
 \usepackage[margin=1in]{geometry}
-\usepackage{hyperref}
-\PassOptionsToPackage{usenames,dvipsnames}{color} % color is loaded by hyperref
-\hypersetup{unicode=true,
-            pdftitle={CompStat/R - Paper 2},
-            pdfauthor={Group 2: Carlo Michaelis, Patrick Molligo, Lukas Ruff},
-            pdfborder={0 0 0},
-            breaklinks=true}
-\urlstyle{same}  % don't use monospace font for urls
 \usepackage{color}
 \usepackage{fancyvrb}
 \newcommand{\VerbBar}{|}
@@ -45,33 +38,16 @@
 \newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{{#1}}}
 \newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{{#1}}}
 \newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{{#1}}}
-\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{{#1}}}
 \newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{{#1}}}
-\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{{#1}}}
 \newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{{#1}}}
-\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{{#1}}}
-\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{{#1}}}
-\newcommand{\ImportTok}[1]{{#1}}
 \newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{{#1}}}}
-\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
-\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
-\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
 \newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{{#1}}}
-\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{{#1}}}
-\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{{#1}}}
-\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{{#1}}}}
-\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{{#1}}}}
-\newcommand{\BuiltInTok}[1]{{#1}}
-\newcommand{\ExtensionTok}[1]{{#1}}
-\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{{#1}}}}
-\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{{#1}}}
-\newcommand{\RegionMarkerTok}[1]{{#1}}
-\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
-\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
 \newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{{#1}}}
-\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{{#1}}}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{{#1}}}
+\newcommand{\RegionMarkerTok}[1]{{#1}}
+\newcommand{\ErrorTok}[1]{\textbf{{#1}}}
 \newcommand{\NormalTok}[1]{{#1}}
-\usepackage{graphicx,grffile}
+\usepackage{graphicx}
 \makeatletter
 \def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
 \def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
@@ -80,11 +56,26 @@
 % margins by default, and it is still possible to overwrite the defaults
 % using explicit options in \includegraphics[width, height, ...]{}
 \setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\ifxetex
+  \usepackage[setpagesize=false, % page size defined by xetex
+              unicode=false, % unicode breaks when used with xetex
+              xetex]{hyperref}
+\else
+  \usepackage[unicode=true]{hyperref}
+\fi
+\hypersetup{breaklinks=true,
+            bookmarks=true,
+            pdfauthor={Group 2: Carlo Michaelis, Patrick Molligo, Lukas Ruff},
+            pdftitle={CompStat/R - Paper 2},
+            colorlinks=true,
+            citecolor=blue,
+            urlcolor=blue,
+            linkcolor=magenta,
+            pdfborder={0 0 0}}
+\urlstyle{same}  % don't use monospace font for urls
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{6pt plus 2pt minus 1pt}
 \setlength{\emergencystretch}{3em}  % prevent overfull lines
-\providecommand{\tightlist}{%
-  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 \setcounter{secnumdepth}{0}
 
 %%% Use protect on footnotes to avoid problems with footnotes in titles
@@ -114,18 +105,10 @@
 
 
 
-% Redefines (sub)paragraphs to behave more like sections
-\ifx\paragraph\undefined\else
-\let\oldparagraph\paragraph
-\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
-\fi
-\ifx\subparagraph\undefined\else
-\let\oldsubparagraph\subparagraph
-\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
-\fi
-
 \begin{document}
+
 \maketitle
+
 
 \subsection{Part I: Functions}\label{part-i-functions}
 
@@ -263,8 +246,8 @@ function will return a vector with \texttt{NA}s:
 \end{verbatim}
 
 The reason for the result is that the functions \texttt{mean()},
-\texttt{var()} and \texttt{sd()} use \texttt{na.rm\ =\ FALSE} as
-default, which means that missing values are not removed. If the vector
+\texttt{var()} and \texttt{sd()} use \texttt{na.rm = FALSE} as default,
+which means that missing values are not removed. If the vector
 \texttt{x} contains a missing value, the \texttt{mean()} function (as
 well as \texttt{var()} and \texttt{sd()}) will just return \texttt{NA}
 to inform about missing values. In the case of calculating standard
@@ -272,7 +255,7 @@ error we use the result from our \texttt{sd()} function and calculate an
 \texttt{NA} value with some other numeric values, which will ultimately
 result in \texttt{NA} again.
 
-To solve the problem, we can add \texttt{na.rm\ =\ TRUE} to these three
+To solve the problem, we can add \texttt{na.rm = TRUE} to these three
 functions. To make this optional, we will improve the
 \texttt{meanVarSdSe} function from above as follows:
 
@@ -319,9 +302,9 @@ We define the function with an ellipse \texttt{...}. Our function can
 now receive multiple arguments after the first input \texttt{x}. These
 arguments are used in \texttt{mean()}, \texttt{var()} and \texttt{sd()}.
 If we want to remove missing values in all of these functions (to get a
-result in the case of missing values), we can pass
-\texttt{na.rm\ =\ TRUE} as another argument, such as here:
-\texttt{meanVarSdSe(x,\ na.rm\ =\ TRUE)}. We just have to be aware of
+result in the case of missing values), we can pass \texttt{na.rm = TRUE}
+as another argument, such as here:
+\texttt{meanVarSdSe(x, na.rm = TRUE)}. We just have to be aware of
 \texttt{length(x)} in this case. If we want to have the same result as
 above we have to remove the sum of \texttt{NA} values from the length of
 \texttt{x}. Otherwise the function will calculate a different result
@@ -461,14 +444,17 @@ topics}\label{part-ii-scoping-and-related-topics}
 The main concept behind this exercise is the \emph{Search Path}, which
 \texttt{R} uses to locate objects when called upon. In order for
 \texttt{R} to carry out a command or calculation, it seeks the necessary
-information according to a hierarchical path of ``environments''. Each
-environment has a ``parent'', to which \texttt{R} moves if the required
-information is not yet found. The \texttt{R} workspace is known as the
-\emph{Global Environment} and also has a parent, which is the most
-recently loaded package. If there are no longer any loaded packages,
-then the search path ``ends'' at the final parent environment, the base
-package (\texttt{package:base}). Below we can observe the importance of
-the search path with a simple example:
+information according to a hierarchical path of \emph{environments}.
+Each environment has a \emph{parent}, to which \texttt{R} moves if the
+required information is not yet found. The \texttt{R} workspace is known
+as the \emph{Global Environment} and also has a parent, which is the
+most recently loaded package. If there are no longer any loaded
+packages, then the search path \emph{ends} at the final parent
+environment, the base package (\texttt{package:base}) which just has the
+empty environment as parent.
+
+Below we can observe the importance of the search path with a simple
+example:
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -491,7 +477,7 @@ Although both functions \texttt{f} and \texttt{g} depend on values for
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\CommentTok{# Call f() and g()}
+\CommentTok{# call 1}
 \KeywordTok{f}\NormalTok{()}
 \end{Highlighting}
 \end{Shaded}
@@ -502,6 +488,7 @@ Although both functions \texttt{f} and \texttt{g} depend on values for
 
 \begin{Shaded}
 \begin{Highlighting}[]
+\CommentTok{# call 2}
 \KeywordTok{g}\NormalTok{()}
 \end{Highlighting}
 \end{Shaded}
@@ -516,13 +503,13 @@ information regarding the values of \texttt{x} and \texttt{y},
 \texttt{R} moves to the parent environment, which is the global
 environment in this case. In the global environment, \texttt{x} takes
 the value of \(5\) and \texttt{y} takes the value of \(7\). Thus, the
-function returns \(5*7=35\).
+function returns \(5 \cdot 7=35\).
 
 For function \texttt{g} the search path also begins in the environment
 within the function itself. However, in this case there is a defined
 value for \texttt{x}, as well as an expression defining a value for
 \texttt{y} based on \texttt{x}. The search path ends and the function
-returns \(2*2=4\).
+returns \(2 \cdot 2=4\).
 
 By manipulating the arguments of a function, it is also possible to
 alter the original search path. We see this when calling the following
@@ -530,7 +517,7 @@ function:
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\CommentTok{# Call g(y = x)}
+\CommentTok{# call 3}
 \KeywordTok{g}\NormalTok{(}\DataTypeTok{y =} \NormalTok{x)}
 \end{Highlighting}
 \end{Shaded}
@@ -540,13 +527,14 @@ function:
 \end{verbatim}
 
 Looking back at the code for function \texttt{g}, we see the two
-arguments \texttt{x} and \texttt{y}. When calling \texttt{g(y\ =\ x)}
-however, we are omitting the first argument, which then defaults to the
-value \(2\). When we simply call \texttt{g()}, the \texttt{y\ =\ x}
-argument also defaults to a value dependent on \texttt{x}. But by
-inputing \texttt{y\ =\ x} manually, we send the search path to the
-global environment where \texttt{x} takes the value of \(5\). Thus the
-function returns \(2*5=10\).
+arguments \texttt{x} and \texttt{y}. When calling \texttt{g(y = x)}
+however, we are omitting the first argument \texttt{x}, which then
+defaults to the value \(2\), defined in the function.\\When we simply
+call \texttt{g()}, the \texttt{y = x} argument also defaults to a value
+dependent on \texttt{x}. But by inputing the argument \texttt{y = x}
+manually while calling, we send the search path to the global
+environment where \texttt{x} takes the value of \(5\). Thus the function
+returns \(2 \cdot 5=10\).
 
 \subsubsection{Scoping II}\label{scoping-ii}
 
@@ -554,19 +542,20 @@ In this exercise we once again see the importance of understanding the
 search path and how \texttt{R} carries out tasks according to the
 environment in which it is working. Especially important is the
 \emph{naming} of objects and functions. As discussed in the previous
-section, the ultimate parent environment is \texttt{package:base}, which
-contains the commonly used and most fundamental functions in \texttt{R}.
-Since the global environment (workspace) is separate from
-\texttt{package:base}, it is possible name new objects in the workspace
-using previously defined functions from the base. As long as there is no
-overlap \emph{within} an enviornment, nothing will be overwritten. In
-the following example we see again why the search path is so important
-when defining objects:
+section, the ultimate parent environment to use is
+\texttt{package:base}, which contains the commonly used and most
+fundamental functions in \texttt{R}. Since the global environment
+(workspace) is separate from \texttt{package:base}, it is possible to
+name new objects in the workspace using previously defined functions
+from the base. As long as there is no overlap \emph{within} an
+enviornment, nothing will be overwritten, it will just be masked. In the
+following example we see again why the search path is so important when
+defining objects:
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\CommentTok{# Define a matrix t}
-\CommentTok{# The number of columns is selected as 3, and the matrix is filled row-wise}
+\CommentTok{# Define matrix t, where the number of columns is selected as 3}
+\CommentTok{# and the matrix is filled row-wise}
 \NormalTok{t <-}\StringTok{ }\KeywordTok{matrix}\NormalTok{(}\DecValTok{1}\NormalTok{:}\DecValTok{6}\NormalTok{, }\DataTypeTok{ncol =} \DecValTok{3}\NormalTok{, }\DataTypeTok{byrow =} \OtherTok{TRUE}\NormalTok{)}
 
 \CommentTok{# Print matrix t}
@@ -586,7 +575,7 @@ treat \texttt{t} like a function:
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\CommentTok{# Print t(t)}
+\CommentTok{# Print t(t), which should transpose matrix t}
 \KeywordTok{t}\NormalTok{(t)}
 \end{Highlighting}
 \end{Shaded}
@@ -602,9 +591,11 @@ The result is a \(3\times2\) matrix filled by column using the numbers
 one through six. In other words, we have printed the transpose of the
 original matrix \texttt{t}, which we had defined in the global
 environment. Since \texttt{t} is a defined matrix and not a function,
-\texttt{R} follows the search path from the global environment to the
-parent, which is simply \texttt{package:base}. In the base environment,
-the function \texttt{t()} returns the transpose of the given matrix.
+\texttt{R} will ignore the \texttt{t} in the global environment while
+searching for function \texttt{t}. \texttt{R} follows the search path
+from the global environment to the earlier parents and finds function
+\texttt{t} in \texttt{package:base}. In the base environment, the
+function \texttt{t()} returns the transpose of the given matrix.
 
 \subsubsection{Scoping III}\label{scoping-iii}
 
@@ -618,11 +609,12 @@ objects in the global environment (workspace):
 \begin{Highlighting}[]
 \CommentTok{# Define a function t in the global environment}
 \NormalTok{t <-}\StringTok{ }\NormalTok{function(...) }\KeywordTok{matrix}\NormalTok{(...)}
+
 \CommentTok{# Define a matrix T using the above t function}
 \CommentTok{# with the desired input arguments}
 \NormalTok{T <-}\StringTok{ }\KeywordTok{t}\NormalTok{(}\DecValTok{1}\NormalTok{:}\DecValTok{6}\NormalTok{, }\DataTypeTok{ncol =} \DecValTok{3}\NormalTok{, }\DataTypeTok{byrow =} \OtherTok{TRUE}\NormalTok{)}
 
-\CommentTok{# Print T}
+\CommentTok{# Print result of T}
 \NormalTok{T}
 \end{Highlighting}
 \end{Shaded}
@@ -633,13 +625,13 @@ objects in the global environment (workspace):
 ## [2,]    4    5    6
 \end{verbatim}
 
-As expected, printing \texttt{T} returns a \(2\times3\) matrix filled by
-row using the numbers one through six. Now let's enter \texttt{T} into
-the function \texttt{t}:
+As expected, printing \texttt{T} returns a \(2 \times 3\) matrix filled
+by row using the numbers one through six. Now let's enter \texttt{T}
+into the function \texttt{t}:
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\CommentTok{# Print t(T)}
+\CommentTok{# Call defined function t with argument T}
 \KeywordTok{t}\NormalTok{(T)}
 \end{Highlighting}
 \end{Shaded}
@@ -654,23 +646,32 @@ the function \texttt{t}:
 ## [6,]    6
 \end{verbatim}
 
-Since \texttt{t} is a function we have defined in our workspace,
-\texttt{t(T)} takes \texttt{T} as an argument input and returns a column
-vector containing the numbers one through six. \textbf{NOTE: I'm having
-trouble explaining exactly why t(T) returns a column vector} Let's now
-see what would happen if we had defined \texttt{T} instead as
+Since \texttt{t} is a function we have defined in our workspace (global
+environment), \texttt{t()} takes \texttt{T} as an argument input and
+returns a column vector containing the numbers one through six (note:
+\texttt{t} and \texttt{T} are different objects, because \texttt{R} is
+case sensitive). The transpose function \texttt{t()} from the base
+environment is now masked by our own function, saved in the global
+environment and now is just an alias of \texttt{matrix()} (as we defined
+it). Since the \texttt{matrix()} function has the default value
+\texttt{ncol = 1} and we were not giving any argument, it creates a
+matrix out of the data from \texttt{T} (values \(1\) to \(6\)) and put
+it in just one column.
+
+Let's now see what would happen if we had defined \texttt{T} instead as
 \texttt{t}:
 
 \begin{Shaded}
 \begin{Highlighting}[]
 \CommentTok{# Define a function t in the global environment}
 \NormalTok{t <-}\StringTok{ }\NormalTok{function(...) }\KeywordTok{matrix}\NormalTok{(...)}
+
 \CommentTok{# We now define t as the following matrix using the t function from above}
 \NormalTok{t <-}\StringTok{ }\KeywordTok{t}\NormalTok{(}\DecValTok{1}\NormalTok{:}\DecValTok{6}\NormalTok{, }\DataTypeTok{ncol =} \DecValTok{3}\NormalTok{, }\DataTypeTok{byrow =} \OtherTok{TRUE}\NormalTok{)}
 \CommentTok{# Although we used the function t to define the new matrix t}
 \CommentTok{# both are defined in the global environment}
 
-\CommentTok{# Print t(t)}
+\CommentTok{# Call defined function t with argument t}
 \KeywordTok{t}\NormalTok{(t)}
 \end{Highlighting}
 \end{Shaded}
@@ -682,17 +683,19 @@ see what would happen if we had defined \texttt{T} instead as
 ## [3,]    3    6
 \end{verbatim}
 
-Since two objects cannot have the same name within one environment, the
-new matrix \texttt{t} overwrites the original function. \texttt{t} is
-now a defined matrix and no longer a function, so the search path moves
-to the base environment, where \texttt{t} is defined as the transpose
-function seen earlier. It is therefore clear why we receive the same
-result as in the previous exercise when printing \texttt{t(t)} here.
+Since two objects (independent of their type) cannot have the same name
+within our global environment, the new matrix \texttt{t} overwrites the
+original function. In our global environment, \texttt{t} is now a
+defined matrix and no longer a function, it was replaced. The search
+path now moves down (is looking earlier in path), until it finds
+\texttt{t}, defined as the transpose function (seen earlier), in base
+environment. It is therefore clear why we receive the same result as in
+the previous exercise when printing \texttt{t(t)} here.
 
 This entire concept can be referred to as \emph{name masking}. We can
 think of the transpose function \texttt{t} in the base environment as
 the ``original'' function. Each time a new object \texttt{t} is created
-in future environments, the original is ``masked'', but not overwritten.
+in later environments, the original is ``masked'', but not overwritten.
 So if the search path is led back to the base environment, the original
 function can still be located.
 

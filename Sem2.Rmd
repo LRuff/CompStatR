@@ -251,7 +251,8 @@ c(TRUE, FALSE, TRUE, FALSE) %or% c(TRUE, TRUE, FALSE, FALSE)
 
 ### Scoping I
 
-The main concept behind this exercise is the *Search Path*, which `R` uses to locate objects when called upon. In order for `R` to carry out a command or calculation, it seeks the necessary information according to a hierarchical path of "environments". Each environment has a "parent", to which `R` moves if the required information is not yet found. The `R` workspace is known as the *Global Environment* and also has a parent, which is the most recently loaded package. If there are no longer any loaded packages, then the search path "ends" at the final parent environment, the base package (`package:base`).
+The main concept behind this exercise is the *Search Path*, which `R` uses to locate objects when called upon. In order for `R` to carry out a command or calculation, it seeks the necessary information according to a hierarchical path of *environments*. Each environment has a *parent*, to which `R` moves if the required information is not yet found. The `R` workspace is known as the *Global Environment* and also has a parent, which is the most recently loaded package. If there are no longer any loaded packages, then the search path *ends* at the final parent environment, the base package (`package:base`) which just has the empty environment as parent.
+
 Below we can observe the importance of the search path with a simple example:  
 
 ```{r searchPath}
@@ -271,31 +272,33 @@ g <- function(x = 2, y = x) x * y
 Although both functions `f` and `g` depend on values for `x` and `y`, they return different results when called:  
 
 ```{r searchPathCalls}
-# Call f() and g()
+# call 1
 f()
+# call 2
 g()
 ```
 
-Beginning with function `f`, if we follow the search path we begin in the environment within the function itself. Since there is no information regarding the values of `x` and `y`, `R` moves to the parent environment, which is the global environment in this case. In the global environment, `x` takes the value of $5$ and `y` takes the value of $7$. Thus, the function returns $5*7=35$.  
+Beginning with function `f`, if we follow the search path we begin in the temporal local environment within the function itself. Since there is no information regarding the values of `x` and `y`, `R` moves to the parent environment, which is the global environment in this case. In the global environment, `x` takes the value of $5$ and `y` takes the value of $7$. Thus, the function returns $5 \cdot 7=35$.  
 
-For function `g` the search path also begins in the environment within the function itself. However, in this case there is a defined value for `x`, as well as an expression defining a value for `y` based on `x`. The search path ends and the function returns $2*2=4$.  
+For function `g` the search path also begins in the local environment within the function itself. However, in this case there is a defined value for `x`, as well as an expression defining a value for `y` based on `x`. The search path ends and the function returns $2 \cdot 2=4$.  
 
 By manipulating the arguments of a function, it is also possible to alter the original search path. We see this when calling the following function:
 
 ```{r searchPathAlter}
-# Call g(y = x)
+# call 3
 g(y = x)
 ```
 
-Looking back at the code for function `g`, we see the two arguments `x` and `y`. When calling `g(y = x)` however, we are omitting the first argument, which then defaults to the value $2$. When we simply call `g()`, the `y = x` argument also defaults to a value dependent on `x`. But by inputing `y = x` manually, we send the search path to the global environment where `x` takes the value of $5$. Thus the function returns $2*5=10$.   
+Looking back at the code for function `g`, we see the two arguments `x` and `y`. When calling `g(y = x)` however, we are omitting the first argument `x`, which then defaults to the value $2$, defined in the local environment of the function.  
+When we simply call `g()`, the `y = x` argument also defaults to a local value dependent on local `x`. But by inputing the argument `y = x` manually while calling, we send the search path to the global environment where `x` takes the global value of $5$. Thus the function returns $2 \cdot 5=10$.
 
 ### Scoping II
 
-In this exercise we once again see the importance of understanding the search path and how `R` carries out tasks according to the environment in which it is working. Especially important is the *naming* of objects and functions. As discussed in the previous section, the ultimate parent environment is `package:base`, which contains the commonly used and most fundamental functions in `R`. Since the global environment (workspace) is separate from `package:base`, it is possible name new objects in the workspace using previously defined functions from the base. As long as there is no overlap *within* an enviornment, nothing will be overwritten. In the following example we see again why the search path is so important when defining objects:
+In this exercise we once again see the importance of understanding the search path and how `R` carries out tasks according to the environment in which it is working. Especially important is the *naming* of objects and functions. As discussed in the previous section, the ultimate parent environment to use is `package:base`, which contains the commonly used and most fundamental functions in `R`. Since the global environment (workspace) is separate from `package:base`, it is possible to name new objects in the workspace using previously defined functions from the base. As long as there is no overlap *within* an enviornment, nothing will be overwritten, it will just be masked. In the following example we see again why the search path is so important when defining objects:
 
 ```{r variableOrFunction}
-# Define a matrix t
-# The number of columns is selected as 3, and the matrix is filled row-wise
+# Define matrix t, where the number of columns is selected as 3
+# and the matrix is filled row-wise
 t <- matrix(1:6, ncol = 3, byrow = TRUE)
 
 # Print matrix t
@@ -305,11 +308,11 @@ t
 As expected, printing `t` returns a $2\times3$ matrix filled by row using the numbers one through six. Let's see what happens if we treat `t` like a function:
 
 ```{r transposeFunction}
-# Print t(t)
+# Print t(t), which should transpose matrix t
 t(t)
 ```
 
-The result is a $3\times2$ matrix filled by column using the numbers one through six. In other words, we have printed the transpose of the original matrix `t`, which we had defined in the global environment. Since `t` is a defined matrix and not a function, `R` follows the search path from the global environment to the parent, which is simply `package:base`. In the base environment, the function `t()` returns the transpose of the given matrix.
+The result is a $3\times2$ matrix filled by column using the numbers one through six. In other words, we have printed the transpose of the original matrix `t`, which we had defined in the global environment. Since `t` is a defined matrix and not a function, `R` will ignore the `t` in the global environment while searching for function `t`. `R` follows the search path from the global environment to the earlier parents and finds function `t` in `package:base`. In the base environment, the function `t()` returns the transpose of the given matrix.
 
 ### Scoping III
 
@@ -318,37 +321,50 @@ In the previous exercises we observed how `R` searches through a chain of enviro
 ```{r globalObjects}
 # Define a function t in the global environment
 t <- function(...) matrix(...)
+
 # Define a matrix T using the above t function
 # with the desired input arguments
 T <- t(1:6, ncol = 3, byrow = TRUE)
 
-# Print T
+# Print result of T
 T
 ```
 
-As expected, printing `T` returns a $2\times3$ matrix filled by row using the numbers one through six. Now let's enter `T` into the function `t`: 
+As expected, printing `T` returns a $2 \times 3$ matrix filled by row using the numbers one through six. Now let's enter `T` into the function `t`: 
 
 ```{r printFunctionT}
-# Print t(T)
+# Call defined function t with argument T
 t(T)
 ```
 
-Since `t` is a function we have defined in our workspace, `t(T)` takes `T` as an argument input and returns a column vector containing the numbers one through six. **NOTE: I'm having trouble explaining exactly why t(T) returns a column vector** Let's now see what would happen if we had defined `T` instead as `t`:
+Since `t` is a function we have defined in our workspace (global environment), `t()` takes `T` as an argument input and returns a column vector containing the numbers one through six (note: `t` and `T` are different objects, because `R` is case sensitive). The transpose function `t()` from the base environment is now masked by our own function, saved in the global environment and now is just an alias of `matrix()` (as we defined it). Since the `matrix()` function has the default value `ncol = 1` and we were not giving any argument, it creates a matrix out of the data from `T` (values $1$ to $6$) and put it in just one column.
+
+Let's now see what would happen if we had defined `T` instead as `t`:
 
 ```{r nameMasking}
 # Define a function t in the global environment
 t <- function(...) matrix(...)
+
 # We now define t as the following matrix using the t function from above
 t <- t(1:6, ncol = 3, byrow = TRUE)
 # Although we used the function t to define the new matrix t
 # both are defined in the global environment
 
-# Print t(t)
+# Call defined function t with argument t
 t(t)
 ```
 
-Since two objects cannot have the same name within one environment, the new matrix `t` overwrites the original function. `t` is now a defined matrix and no longer a function, so the search path moves to the base environment, where `t` is defined as the transpose function seen earlier. It is therefore clear why we receive the same result as in the previous exercise when printing `t(t)` here.  
+Since two objects (independent of their type) cannot have the same name within our global environment, the new matrix `t` overwrites the original function. In our global environment, `t` is now a defined matrix and no longer a function, it was replaced. The search path now moves down (is looking earlier in path), until it finds `t`, defined as the transpose function (seen earlier), in base environment. It is therefore clear why we receive the same result as in the previous exercise when printing `t(t)` here.  
 
-This entire concept can be referred to as *name masking*. We can think of the transpose function `t` in the base environment as the "original" function. Each time a new object `t` is created in future environments, the original is "masked", but not overwritten. So if the search path is led back to the base environment, the original function can still be located. 
+This entire concept can be referred to as *name masking*. We can think of the transpose function `t` in the base environment as the *original* function. Each time a new object `t` is created in later environments, the original is *masked*, but not overwritten. So if the search path is led back to the base environment, the original function can still be located. 
 
 ### Dynamic lookup
+
+`R` searches for objects while it runs the code, which is called *dynamic lookup*. A well defined function should process only local variables. In other words it should only depend on the given arguments. This property is called *self containment*. If we use not well defined functions, it can lead to inconsistent results or we risk errors. For illustration, we can use the example:
+
+
+
+
+
+
+
