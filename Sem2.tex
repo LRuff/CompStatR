@@ -538,7 +538,7 @@ function:
 
 Looking back at the code for function \texttt{g}, we see the two
 arguments \texttt{x} and \texttt{y}. When calling \texttt{g(y\ =\ x)}
-however, we are ignoring the first argument, which then defaults to the
+however, we are omitting the first argument, which then defaults to the
 value \(2\). When we simply call \texttt{g()}, the \texttt{y\ =\ x}
 argument also defaults to a value dependent on \texttt{x}. But by
 inputing \texttt{y\ =\ x} manually, we send the search path to the
@@ -547,7 +547,95 @@ function returns \(2*5=10\).
 
 \subsubsection{Scoping II}\label{scoping-ii}
 
+In this exercise we once again see the importance of understanding the
+search path and how \texttt{R} carries out tasks according to the
+environment in which it is working. Especially important is the
+\emph{naming} of objects and functions. As discussed in the previous
+section, the ultimate parent environment is \texttt{package:base}, which
+contains the commonly used and most fundamental functions in \texttt{R}.
+Since the global environment (workspace) is separate from
+\texttt{package:base}, it is possible name new objects in the workspace
+using previously defined functions from the base. As long as there is no
+overlap \emph{within} an enviornment, nothing will be overwritten. In
+the following example we see again why the search path is so important
+when defining objects:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# We define a matrix t}
+\CommentTok{# The number of columns is selected as 3, and the matrix is filled row-wise}
+\NormalTok{t <-}\StringTok{ }\KeywordTok{matrix}\NormalTok{(}\DecValTok{1}\NormalTok{:}\DecValTok{6}\NormalTok{, }\DataTypeTok{ncol =} \DecValTok{3}\NormalTok{, }\DataTypeTok{byrow =} \OtherTok{TRUE}\NormalTok{)}
+\CommentTok{# Print matrix t}
+\NormalTok{t}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##      [,1] [,2] [,3]
+## [1,]    1    2    3
+## [2,]    4    5    6
+\end{verbatim}
+
+As expected, printing \texttt{t} returns a \(2\times3\) matrix filled by
+row using the numbers one through six. Let's see what happens if we
+treat \texttt{t} like a function:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Print t(t)}
+\KeywordTok{t}\NormalTok{(t)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##      [,1] [,2]
+## [1,]    1    4
+## [2,]    2    5
+## [3,]    3    6
+\end{verbatim}
+
+The result is a \(3\times2\) matrix filled by column using the numbers
+one through six. In other words, we have printed the transpose of the
+original matrix \texttt{t}, which we had defined in the global
+environment. Since \texttt{t} is a defined matrix and not a function,
+\texttt{R} follows the search path from the global environment to the
+parent, which is simply \texttt{package:base}. In the base environment,
+the function \texttt{t()} returns the transpose of the given matrix.
+
 \subsubsection{Scoping III}\label{scoping-iii}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{t <-}\StringTok{ }\NormalTok{function(...) }\KeywordTok{matrix}\NormalTok{(...)}
+\NormalTok{T <-}\StringTok{ }\KeywordTok{t}\NormalTok{(}\DecValTok{1}\NormalTok{:}\DecValTok{6}\NormalTok{, }\DataTypeTok{ncol =} \DecValTok{3}\NormalTok{, }\DataTypeTok{byrow =} \OtherTok{TRUE}\NormalTok{)}
+\KeywordTok{t}\NormalTok{(T)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##      [,1]
+## [1,]    1
+## [2,]    4
+## [3,]    2
+## [4,]    5
+## [5,]    3
+## [6,]    6
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{t <-}\StringTok{ }\NormalTok{function(...) }\KeywordTok{matrix}\NormalTok{(...)}
+\NormalTok{t <-}\StringTok{ }\KeywordTok{t}\NormalTok{(}\DecValTok{1}\NormalTok{:}\DecValTok{6}\NormalTok{, }\DataTypeTok{ncol =} \DecValTok{3}\NormalTok{, }\DataTypeTok{byrow =} \OtherTok{TRUE}\NormalTok{)}
+\KeywordTok{t}\NormalTok{(t)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##      [,1] [,2]
+## [1,]    1    4
+## [2,]    2    5
+## [3,]    3    6
+\end{verbatim}
 
 \subsubsection{Dynamic lookup}\label{dynamic-lookup}
 

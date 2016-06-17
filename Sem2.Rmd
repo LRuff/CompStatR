@@ -284,12 +284,40 @@ By manipulating the arguments of a function, it is also possible to alter the or
 g(y = x)
 ```
 
-Looking back at the code for function `g`, we see the two arguments `x` and `y`. When calling `g(y = x)` however, we are ignoring the first argument, which then defaults to the value $2$. When we simply call `g()`, the `y = x` argument also defaults to a value dependent on `x`. But by inputing `y = x` manually, we send the search path to the global environment where `x` takes the value of $5$. Thus the function returns $2*5=10$.   
-
-
+Looking back at the code for function `g`, we see the two arguments `x` and `y`. When calling `g(y = x)` however, we are omitting the first argument, which then defaults to the value $2$. When we simply call `g()`, the `y = x` argument also defaults to a value dependent on `x`. But by inputing `y = x` manually, we send the search path to the global environment where `x` takes the value of $5$. Thus the function returns $2*5=10$.   
 
 ### Scoping II
 
+In this exercise we once again see the importance of understanding the search path and how `R` carries out tasks according to the environment in which it is working. Especially important is the *naming* of objects and functions. As discussed in the previous section, the ultimate parent environment is `package:base`, which contains the commonly used and most fundamental functions in `R`. Since the global environment (workspace) is separate from `package:base`, it is possible name new objects in the workspace using previously defined functions from the base. As long as there is no overlap *within* an enviornment, nothing will be overwritten. In the following example we see again why the search path is so important when defining objects:
+
+```{r variableOrFunction}
+# We define a matrix t
+# The number of columns is selected as 3, and the matrix is filled row-wise
+t <- matrix(1:6, ncol = 3, byrow = TRUE)
+# Print matrix t
+t
+```
+
+As expected, printing `t` returns a $2\times3$ matrix filled by row using the numbers one through six. Let's see what happens if we treat `t` like a function:
+
+```{r transposeFunction}
+# Print t(t)
+t(t)
+```
+
+The result is a $3\times2$ matrix filled by column using the numbers one through six. In other words, we have printed the transpose of the original matrix `t`, which we had defined in the global environment. Since `t` is a defined matrix and not a function, `R` follows the search path from the global environment to the parent, which is simply `package:base`. In the base environment, the function `t()` returns the transpose of the given matrix.
+
 ### Scoping III
+
+```{r scoping3}
+t <- function(...) matrix(...)
+T <- t(1:6, ncol = 3, byrow = TRUE)
+t(T)
+
+t <- function(...) matrix(...)
+t <- t(1:6, ncol = 3, byrow = TRUE)
+t(t)
+```
+
 
 ### Dynamic lookup
