@@ -251,8 +251,7 @@ c(TRUE, FALSE, TRUE, FALSE) %or% c(TRUE, TRUE, FALSE, FALSE)
 
 ### Scoping I
 
-The main concept behind this exercise is the *Search Path*, which `R` uses to locate objects when called upon. In order for `R` to carry out a command or calculation, it seeks the necessary information according to a hierarchical path of "environments". Each environment has a "parent" environment, to which `R` moves if the required information is not yet found. The `R` workspace is known as the *Global Environment* and also has a parent, which is either the most recently loaded package or the base package (`package:base`), also known as the "end" of the search path.  
-
+The main concept behind this exercise is the *Search Path*, which `R` uses to locate objects when called upon. In order for `R` to carry out a command or calculation, it seeks the necessary information according to a hierarchical path of "environments". Each environment has a "parent", to which `R` moves if the required information is not yet found. The `R` workspace is known as the *Global Environment* and also has a parent, which is the most recently loaded package. If there are no longer any loaded packages, then the search path "ends" at the final parent environment, the base package (`package:base`).
 Below we can observe the importance of the search path with a simple example:  
 
 ```{r searchPath}

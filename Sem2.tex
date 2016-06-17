@@ -458,18 +458,17 @@ topics}\label{part-ii-scoping-and-related-topics}
 
 \subsubsection{Scoping I}\label{scoping-i}
 
-The main concept behind this exercise is that of the \emph{Search Path},
-which \texttt{R} uses to locate objects when called upon. In order for
+The main concept behind this exercise is the \emph{Search Path}, which
+\texttt{R} uses to locate objects when called upon. In order for
 \texttt{R} to carry out a command or calculation, it seeks the necessary
 information according to a hierarchical path of ``environments''. Each
-environment has a ``parent'' environment, to which \texttt{R} moves if
-the required information is not yet found. The \texttt{R} workspace is
-known as the \emph{Global Environment} and also has a parent, which is
-either the most recently loaded package or the base package
-(\texttt{package:base}), also known as the ``end'' of the search path.
-
-Below we can observe the importance of the search path with a simple
-example:
+environment has a ``parent'', to which \texttt{R} moves if the required
+information is not yet found. The \texttt{R} workspace is known as the
+\emph{Global Environment} and also has a parent, which is the most
+recently loaded package. If there are no longer any loaded packages,
+then the search path ``ends'' at the final parent environment, the base
+package (\texttt{package:base}). Below we can observe the importance of
+the search path with a simple example:
 
 \begin{Shaded}
 \begin{Highlighting}[]
