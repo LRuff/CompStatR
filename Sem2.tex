@@ -472,7 +472,7 @@ the search path with a simple example:
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\CommentTok{# We assign numeric values to the vectors x and y in the workspace }
+\CommentTok{# Assign numeric values to the vectors x and y in the workspace }
 \CommentTok{# which we call the global environment}
 \NormalTok{x <-}\StringTok{ }\DecValTok{5}
 \NormalTok{y <-}\StringTok{ }\DecValTok{7}
@@ -491,6 +491,7 @@ Although both functions \texttt{f} and \texttt{g} depend on values for
 
 \begin{Shaded}
 \begin{Highlighting}[]
+\CommentTok{# Call f() and g()}
 \KeywordTok{f}\NormalTok{()}
 \end{Highlighting}
 \end{Shaded}
@@ -515,7 +516,8 @@ information regarding the values of \texttt{x} and \texttt{y},
 \texttt{R} moves to the parent environment, which is the global
 environment in this case. In the global environment, \texttt{x} takes
 the value of \(5\) and \texttt{y} takes the value of \(7\). Thus, the
-function returns \(5*7=35\).\\
+function returns \(5*7=35\).
+
 For function \texttt{g} the search path also begins in the environment
 within the function itself. However, in this case there is a defined
 value for \texttt{x}, as well as an expression defining a value for
@@ -528,6 +530,7 @@ function:
 
 \begin{Shaded}
 \begin{Highlighting}[]
+\CommentTok{# Call g(y = x)}
 \KeywordTok{g}\NormalTok{(}\DataTypeTok{y =} \NormalTok{x)}
 \end{Highlighting}
 \end{Shaded}
@@ -562,9 +565,10 @@ when defining objects:
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\CommentTok{# We define a matrix t}
+\CommentTok{# Define a matrix t}
 \CommentTok{# The number of columns is selected as 3, and the matrix is filled row-wise}
 \NormalTok{t <-}\StringTok{ }\KeywordTok{matrix}\NormalTok{(}\DecValTok{1}\NormalTok{:}\DecValTok{6}\NormalTok{, }\DataTypeTok{ncol =} \DecValTok{3}\NormalTok{, }\DataTypeTok{byrow =} \OtherTok{TRUE}\NormalTok{)}
+
 \CommentTok{# Print matrix t}
 \NormalTok{t}
 \end{Highlighting}
@@ -604,10 +608,38 @@ the function \texttt{t()} returns the transpose of the given matrix.
 
 \subsubsection{Scoping III}\label{scoping-iii}
 
+In the previous exercises we observed how \texttt{R} searches through a
+chain of environments to locate objects and information. In this next
+exercise, we investigate what happens when different objects are defined
+identically within the \emph{same} environment. Here we are defining
+objects in the global environment (workspace):
+
 \begin{Shaded}
 \begin{Highlighting}[]
+\CommentTok{# Define a function t in the global environment}
 \NormalTok{t <-}\StringTok{ }\NormalTok{function(...) }\KeywordTok{matrix}\NormalTok{(...)}
+\CommentTok{# Define a matrix T using the above t function}
+\CommentTok{# with the desired input arguments}
 \NormalTok{T <-}\StringTok{ }\KeywordTok{t}\NormalTok{(}\DecValTok{1}\NormalTok{:}\DecValTok{6}\NormalTok{, }\DataTypeTok{ncol =} \DecValTok{3}\NormalTok{, }\DataTypeTok{byrow =} \OtherTok{TRUE}\NormalTok{)}
+
+\CommentTok{# Print T}
+\NormalTok{T}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##      [,1] [,2] [,3]
+## [1,]    1    2    3
+## [2,]    4    5    6
+\end{verbatim}
+
+As expected, printing \texttt{T} returns a \(2\times3\) matrix filled by
+row using the numbers one through six. Now let's enter \texttt{T} into
+the function \texttt{t}:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Print t(T)}
 \KeywordTok{t}\NormalTok{(T)}
 \end{Highlighting}
 \end{Shaded}
@@ -622,10 +654,23 @@ the function \texttt{t()} returns the transpose of the given matrix.
 ## [6,]    6
 \end{verbatim}
 
+Since \texttt{t} is a function we have defined in our workspace,
+\texttt{t(T)} takes \texttt{T} as an argument input and returns a column
+vector containing the numbers one through six. \textbf{NOTE: I'm having
+trouble explaining exactly why t(T) returns a column vector} Let's now
+see what would happen if we had defined \texttt{T} instead as
+\texttt{t}:
+
 \begin{Shaded}
 \begin{Highlighting}[]
+\CommentTok{# Define a function t in the global environment}
 \NormalTok{t <-}\StringTok{ }\NormalTok{function(...) }\KeywordTok{matrix}\NormalTok{(...)}
+\CommentTok{# We now define t as the following matrix using the t function from above}
 \NormalTok{t <-}\StringTok{ }\KeywordTok{t}\NormalTok{(}\DecValTok{1}\NormalTok{:}\DecValTok{6}\NormalTok{, }\DataTypeTok{ncol =} \DecValTok{3}\NormalTok{, }\DataTypeTok{byrow =} \OtherTok{TRUE}\NormalTok{)}
+\CommentTok{# Although we used the function t to define the new matrix t}
+\CommentTok{# both are defined in the global environment}
+
+\CommentTok{# Print t(t)}
 \KeywordTok{t}\NormalTok{(t)}
 \end{Highlighting}
 \end{Shaded}
@@ -636,6 +681,20 @@ the function \texttt{t()} returns the transpose of the given matrix.
 ## [2,]    2    5
 ## [3,]    3    6
 \end{verbatim}
+
+Since two objects cannot have the same name within one environment, the
+new matrix \texttt{t} overwrites the original function. \texttt{t} is
+now a defined matrix and no longer a function, so the search path moves
+to the base environment, where \texttt{t} is defined as the transpose
+function seen earlier. It is therefore clear why we receive the same
+result as in the previous exercise when printing \texttt{t(t)} here.
+
+This entire concept can be referred to as \emph{name masking}. We can
+think of the transpose function \texttt{t} in the base environment as
+the ``original'' function. Each time a new object \texttt{t} is created
+in future environments, the original is ``masked'', but not overwritten.
+So if the search path is led back to the base environment, the original
+function can still be located.
 
 \subsubsection{Dynamic lookup}\label{dynamic-lookup}
 

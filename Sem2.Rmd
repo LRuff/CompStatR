@@ -255,7 +255,7 @@ The main concept behind this exercise is the *Search Path*, which `R` uses to lo
 Below we can observe the importance of the search path with a simple example:  
 
 ```{r searchPath}
-# We assign numeric values to the vectors x and y in the workspace 
+# Assign numeric values to the vectors x and y in the workspace 
 # which we call the global environment
 x <- 5
 y <- 7
@@ -271,16 +271,19 @@ g <- function(x = 2, y = x) x * y
 Although both functions `f` and `g` depend on values for `x` and `y`, they return different results when called:  
 
 ```{r searchPathCalls}
+# Call f() and g()
 f()
 g()
 ```
 
 Beginning with function `f`, if we follow the search path we begin in the environment within the function itself. Since there is no information regarding the values of `x` and `y`, `R` moves to the parent environment, which is the global environment in this case. In the global environment, `x` takes the value of $5$ and `y` takes the value of $7$. Thus, the function returns $5*7=35$.  
+
 For function `g` the search path also begins in the environment within the function itself. However, in this case there is a defined value for `x`, as well as an expression defining a value for `y` based on `x`. The search path ends and the function returns $2*2=4$.  
 
 By manipulating the arguments of a function, it is also possible to alter the original search path. We see this when calling the following function:
 
 ```{r searchPathAlter}
+# Call g(y = x)
 g(y = x)
 ```
 
@@ -291,9 +294,10 @@ Looking back at the code for function `g`, we see the two arguments `x` and `y`.
 In this exercise we once again see the importance of understanding the search path and how `R` carries out tasks according to the environment in which it is working. Especially important is the *naming* of objects and functions. As discussed in the previous section, the ultimate parent environment is `package:base`, which contains the commonly used and most fundamental functions in `R`. Since the global environment (workspace) is separate from `package:base`, it is possible name new objects in the workspace using previously defined functions from the base. As long as there is no overlap *within* an enviornment, nothing will be overwritten. In the following example we see again why the search path is so important when defining objects:
 
 ```{r variableOrFunction}
-# We define a matrix t
+# Define a matrix t
 # The number of columns is selected as 3, and the matrix is filled row-wise
 t <- matrix(1:6, ncol = 3, byrow = TRUE)
+
 # Print matrix t
 t
 ```
@@ -309,15 +313,42 @@ The result is a $3\times2$ matrix filled by column using the numbers one through
 
 ### Scoping III
 
-```{r scoping3}
-t <- function(...) matrix(...)
-T <- t(1:6, ncol = 3, byrow = TRUE)
-t(T)
+In the previous exercises we observed how `R` searches through a chain of environments to locate objects and information. In this next exercise, we investigate what happens when different objects are defined identically within the *same* environment. Here we are defining objects in the global environment (workspace):
 
+```{r globalObjects}
+# Define a function t in the global environment
 t <- function(...) matrix(...)
+# Define a matrix T using the above t function
+# with the desired input arguments
+T <- t(1:6, ncol = 3, byrow = TRUE)
+
+# Print T
+T
+```
+
+As expected, printing `T` returns a $2\times3$ matrix filled by row using the numbers one through six. Now let's enter `T` into the function `t`: 
+
+```{r printFunctionT}
+# Print t(T)
+t(T)
+```
+
+Since `t` is a function we have defined in our workspace, `t(T)` takes `T` as an argument input and returns a column vector containing the numbers one through six. **NOTE: I'm having trouble explaining exactly why t(T) returns a column vector** Let's now see what would happen if we had defined `T` instead as `t`:
+
+```{r nameMasking}
+# Define a function t in the global environment
+t <- function(...) matrix(...)
+# We now define t as the following matrix using the t function from above
 t <- t(1:6, ncol = 3, byrow = TRUE)
+# Although we used the function t to define the new matrix t
+# both are defined in the global environment
+
+# Print t(t)
 t(t)
 ```
 
+Since two objects cannot have the same name within one environment, the new matrix `t` overwrites the original function. `t` is now a defined matrix and no longer a function, so the search path moves to the base environment, where `t` is defined as the transpose function seen earlier. It is therefore clear why we receive the same result as in the previous exercise when printing `t(t)` here.  
+
+This entire concept can be referred to as *name masking*. We can think of the transpose function `t` in the base environment as the "original" function. Each time a new object `t` is created in future environments, the original is "masked", but not overwritten. So if the search path is led back to the base environment, the original function can still be located. 
 
 ### Dynamic lookup
