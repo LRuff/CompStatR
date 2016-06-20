@@ -67,12 +67,12 @@ meanVarSdSe <- function(x) {
   #   x: numeric vector
   #
   # Returns:
-  #   a numerical vector containing mean, variance, standard deviation
+  #   a named numerical vector containing mean, variance, standard deviation
   #   and standard error of x
   
-  # We check if x is numeric vector
+  # We check if x is a numeric vector
   # If not: stop and throw error
-  if( !is.numeric(x) ) {
+  if (!is.numeric(x)) {
     stop("Argument needs to be numeric.")
   }
   
@@ -116,26 +116,29 @@ x <- c(NA, 1:100)
 meanVarSdSe(x)
 ```
 
-The reason for the result is that the functions `mean()`, `var()` and `sd()` use `na.rm = FALSE` as default, which means that missing values are not removed. If the vector `x` contains a missing value, the `mean()` function (as well as `var()` and `sd()`) will just return `NA` to inform about missing values. In the case of calculating standard error we use the result from our `sd()` function and calculate an `NA` value with some other numeric values, which will ultimately result in `NA` again.
+The reason for the result is that the functions `mean`, `var` and `sd` use `na.rm = FALSE` as default, which means that missing values are not removed. If the vector `x` contains a missing value, the `mean` function (as well as `var` and `sd`) will just return `NA` to inform about missing values. In the case of calculating standard error we use the result from our `sd` function and calculate an `NA` value with some other numeric values, which will ultimately result in `NA` again.
 
 To solve the problem, we can add `na.rm = TRUE` to these three functions. To make this optional, we will improve the `meanVarSdSe` function from above as follows:
 
 ```{r meanVarSdSeImprove}
 meanVarSdSe <- function(x, ...) {
-  # Expects a numeric vector and flag to handle missing values as an argument
-  # and returns the mean, the variance, the standard deviation
-  # and the standard error
+  # Expects a numeric vector as an argument and returns the mean, the variance,
+  # the standard deviation and the standard error. 
+  # Other arguments are possible via the “...” argument (e.g. a flag to handle
+  # missing values)
   # 
   # Args:
-  #   x: numeric vector, na.rm: boolean
+  #   x:    numeric vector
+  #   ...:  optional other arguments passed along to contained functions
+  #         (e.g na.rm)
   #
   # Returns:
-  #   a numerical vector containing mean, variance, standard deviation
+  #   a named numerical vector containing mean, variance, standard deviation
   #   and standard error of x
   
-  # We check if x is numeric vector
+  # We check if x is a numeric vector
   # If not: stop and throw error
-  if( !is.numeric(x) ) {
+  if (!is.numeric(x)) {
     stop("Argument needs to be numeric.")
   }
   
@@ -143,7 +146,7 @@ meanVarSdSe <- function(x, ...) {
   y <- vector()
   
   # Calculate mean, variance, standard deviation and standard error
-  # and save it in y
+  # and save it in y. Further arguments enabled via the “...” argument.
   y[1] <- mean(x, ...)
   y[2] <- var(x, ...)
   y[3] <- sd(x, ...)
@@ -157,7 +160,7 @@ meanVarSdSe <- function(x, ...) {
 }
 ```
 
-We define the function with an ellipse `...`. Our function can now receive multiple arguments after the first input `x`. These arguments are used in `mean()`, `var()` and `sd()`. If we want to remove missing values in all of these functions (to get a result in the case of missing values), we can pass `na.rm = TRUE` as another argument, such as here: `meanVarSdSe(x, na.rm = TRUE)`. We just have to be aware of `length(x)` in this case. If we want to have the same result as above we have to remove the sum of `NA` values from the length of `x`. Otherwise the function will calculate a different result than in Part I, because then lentgh differs.
+We define the function with the `...` argument which technically is called an ellipsis. Our function can now receive multiple arguments after the first input `x`. These arguments are used in `mean`, `var` and `sd`. If we want to remove missing values in all of these functions (to get a result in the case of missing values), we can pass `na.rm = TRUE` as another argument, such as here: `meanVarSdSe(x, na.rm = TRUE)`. We just have to be aware of `length(x)` in this case. If we want to have the same result as above we have to remove the sum of `NA` values from the length of `x`. Otherwise the function will calculate a different result than in Part I, because then the length differs.
 
 Let's confirm the result:
 
@@ -172,25 +175,25 @@ Now we will use the function `dropNa` from Functions I to deal with missing valu
 ```{r meanVarSdSeDrop}
 meanVarSdSe <- function(x) {
   # Expects a numeric vector as an argument and returns the mean,
-  # the variance, the standard deviation and the standard error
-  # it also removes missing values if x contains some
+  # the variance, the standard deviation and the standard error.
+  # It also removes missing values if x contains any
   # 
   # Args:
   #   x: numeric vector
   #
   # Returns:
-  #   a numerical vector containing mean, variance, standard deviation
+  #   a named numerical vector containing mean, variance, standard deviation
   #   and standard error of x
   
-  # We check if x is numeric vector
+  # We check if x is a numeric vector
   # If not: stop and throw error
-  if( !is.numeric(x) ) {
+  if (!is.numeric(x)) {
     stop("Argument needs to be numeric.")
   }
   
   # We check if x contains missing values
-  # If so: remove missing values using dropNA
-  if( sum(is.na(x)) > 0 ) {
+  # If so: remove missing values using dropNa
+  if (sum(is.na(x)) > 0) {
     x <- dropNa(x)
   }
   
@@ -212,7 +215,7 @@ meanVarSdSe <- function(x) {
 }
 ```
 
-We used the function from Part I and added a condition which checks if we have missing values in `x`, using `is.na`. If the sum of `NA` values is greater than $0$ (i.e.,if there is one or more missing value), we use the function `dropNA` from the first exercise to remove all missing values. The remaining code of the function can remain as above in Part I.
+We used the function from Part I and added a condition which checks if we have missing values in `x`, using `is.na`. If the sum of `NA` values is greater than $0$ (i.e. if there is one or more missing value), we use the function `dropNa` from the first exercise to remove all missing values. The remaining code of the function can remain as above in Part I.
 
 We can confirm the result:
 
@@ -226,26 +229,27 @@ In this section we define an infix function `%or%`. This function should behave 
 
 ```{r infixOr}
 # Define infix function %or%
-`%or%` <- function(a, b) {
-  # Check if vector a and b is logical
-  if( !(is.logical(a) & is.logical(b)) ) {
-    stop("a and/or b have to be logical vectors.")
+'%or%' <- function(a, b) {
+  # Check if vectors a and b are logical
+  if (!(is.logical(a) & is.logical(b))) {
+    stop("a and b have to be logical vectors.")
   }
   
-  # Use ifelse to calculate result and return it directly
+  # Use ifelse to calculate the result and return it directly.
   # If the sum of the entry of vector a and the entry of vector b
   # is greater than or equal to 1, set result to TRUE, otherwise to FALSE
   ifelse(a + b >= 1,  TRUE, FALSE)
 }
 ```
 
-First we check if we have logical vectors. If `a` and/or `b` are not logical, we leave the function and throw an error. Otherwise we can calculate the `or` operation using the `ifelse` function and return the result directly after calculation. Inside of the `ifelse` function, the first argument checks the condition if the sum of the values `a` and `b` are greater than or equal to $1$, where `TRUE` is equal to $1$ and `FALSE` is equal to $0$.
+First we check if we have logical vectors. If either `a` or `b` (or both) are not logical, we leave the function and throw an error. Otherwise we can calculate the `or` operation using the `ifelse` function and return the result directly after calculation. Inside the `ifelse` function, the first argument checks element-wise the condition if the sum of the respective elements of `a` and `b` are greater than or equal to $1$. If the condition is fulfilled we return `TRUE`; otherwise we return `FALSE`. (which is the case if the sum is equal to $0$)
 
-To confirm the function, we test an example:
+To check our implementation, we test an example:
 
 ```{r infixOrTest}
 c(TRUE, FALSE, TRUE, FALSE) %or% c(TRUE, TRUE, FALSE, FALSE)
 ```
+
 
 ## Part II: Scoping and related topics
 
@@ -265,8 +269,8 @@ f <- function() x * y
   # With no specified argument inputs, the function f follows the search path
   # and locates values for x and y in the global environment
 g <- function(x = 2, y = x) x * y
-  # A new environment is created within the function g, where arguments for x and y
-  # are clearly defined
+  # A new environment is created within the function g, where arguments for x
+  # and y are clearly defined
 ```
 
 Although both functions `f` and `g` depend on values for `x` and `y`, they return different results when called:  
@@ -278,23 +282,22 @@ f()
 g()
 ```
 
-Beginning with function `f`, if we follow the search path we begin in the temporary local environment within the function itself. Since there is no information regarding the values of `x` and `y`, `R` moves to the parent environment, which is the global environment in this case. In the global environment, `x` takes the value of $5$ and `y` takes the value of $7$. Thus, the function returns $5 \cdot 7=35$.  
+Beginning with function `f`, if we follow the search path we begin in the local environment within the function itself. Since there are no objects `x` and `y` in the local environment of `f`, `R` moves to the parent environment, which is the global environment in this case. In the global environment `x` and `y` were defined, where `x` takes the value of $5$ and `y` takes the value of $7$. Thus, `f` returns $5 \cdot 7=35$.
 
-For function `g` the search path also begins in the local environment within the function itself. However, in this case there is a defined value for `x`, as well as an expression defining a value for `y` based on `x`. The search path ends and the function returns $2 \cdot 2=4$.  
+For function `g` the search path also begins in the local environment within the function itself. However, in this case `x` and `y` are defined in the local environment by specifying `x` and `y` as arguments of `g` with default values of `x = 2` and `y = x`, that is `y` is assigned the value of `x` of the *local* environment of `g` if not specified otherwise. If we call `g` without specifying the arguments, the default values from the function-definition are used and hence the function returns $2 \cdot 2=4$ and the search path ends in the local environment.
 
-By manipulating the arguments of a function, it is also possible to alter the original search path. We see this when calling the following function:
+By specifying the arguments of `g` explicitly, it is possible to assign values to the objects of the local environment of `g`. We see this when calling the following function:
 
 ```{r searchPathAlter}
 # Call 3
 g(y = x)
 ```
 
-Looking back at the code for function `g`, we see the two arguments `x` and `y`. When calling `g(y = x)` however, we are omitting the first argument `x`, which then defaults to the value $2$, defined in the local environment of the function.  
-When we simply call `g()`, the `y = x` argument also defaults to a local value dependent on local `x`. But by inputing the argument `y = x` manually while calling, we send the search path to the global environment where `x` takes the global value of $5$. Thus the function returns $2 \cdot 5=10$.
+Since we assign a value to the `y` argument specifically, `y` does not adopt its default value, but the value specified. If the value assigned is a variable, this variable is searched for in the environment, where the function is called from, i.e. the global environment. Because we have assigned `x = 5` in the global environment, we pass the value of $5$ to the argument `y` of function `g`. We are omitting the first argument `x`, which defaults to the value $2$. Thus the function returns $2 \cdot 5=10$.
 
 ### Scoping II
 
-In this exercise we once again see the importance of understanding the search path and how `R` carries out tasks according to the environment in which it is working. Especially important is the *naming* of objects and functions. As discussed in the previous section, the ultimate parent environment to use is `package:base`, which contains the commonly used and most fundamental functions in `R`. Since the global environment (workspace) is separate from `package:base`, it is possible to name new objects in the workspace using previously defined functions from the base. As long as there is no overlap *within* an enviornment, nothing will be overwritten, it will just be masked. In the following example we see again why the search path is so important when defining objects:
+In this exercise we once again see the importance of understanding the search path and how `R` carries out tasks according to the environment in which it is working. Especially important is the *naming* of objects and functions. As discussed in the previous section, the ultimate parent environment used is `package:base`, which contains the commonly used and most fundamental functions in `R`. Since the global environment (workspace) is separate from `package:base`, it is possible to name new objects in the workspace using previously defined names from objects and functions from the base environment. As long as there is no overlap *within* an enviornment, nothing will be overwritten, it will just be masked. In the following example we see again why the search path is so important when defining objects:
 
 ```{r variableOrFunction}
 # Define matrix t, where the number of columns is selected as 3
@@ -305,58 +308,71 @@ t <- matrix(1:6, ncol = 3, byrow = TRUE)
 t
 ```
 
-As expected, printing `t` returns a $2\times3$ matrix filled by row using the numbers one through six. Let's see what happens if we treat `t` like a function:
+As expected, printing `t` returns a $2\times3$ matrix filled by row using the numbers one through six. Let's see what happens if we run the following code:
 
 ```{r transposeFunction}
-# Print t(t), which should transpose matrix t
+# Print t(t), which transposes matrix t
 t(t)
 ```
 
-The result is a $3\times2$ matrix filled by column using the numbers one through six. In other words, we have printed the transpose of the original matrix `t`, which we had defined in the global environment. Since `t` is a defined matrix and not a function, `R` will ignore the `t` in the global environment while searching for function `t`. `R` follows the search path from the global environment to the earlier parents and finds function `t` in `package:base`. In the base environment, the function `t()` returns the transpose of the given matrix.
+The result is a $3\times2$ matrix filled by column using the numbers one through six. In other words, we have printed the transpose of the original matrix `t`, which we had defined in the global environment. When calling `t()`, the brackets are an indicator for `R`, that a function named `t` should be called. Since the object `t` in our workspace is of object-class matrix and not a function, `R` will ignore the `t` in the global environment while searching for function `t()`. `R` follows the search path from the global environment to the higher parents and finds function `t()` in `package:base`. In the base environment. The function `t()` returns the transpose of the given matrix.
 
 ### Scoping III
 
-In the previous exercises we observed how `R` searches through a chain of environments to locate objects and information. In this next exercise, we investigate what happens when different objects are defined identically within the *same* environment. Here we are defining objects in the global environment (workspace):
+In the previous exercises we observed how `R` searches through a chain of environments to locate objects and information. In this next exercise, we investigate what happens when different objects are defined with identical names within the *same* environment. Here we are defining objects in the global environment (workspace):
 
 ```{r globalObjects}
 # Define a function t in the global environment
+# This function simply passes its arguments to the function “matrix”
 t <- function(...) matrix(...)
 
-# Define a matrix T using the above t function
-# with the desired input arguments
+# Define a matrix T using the above function t with the desired input arguments
 T <- t(1:6, ncol = 3, byrow = TRUE)
 
 # Print result of T
 T
 ```
 
-As expected, printing `T` returns a $2 \times 3$ matrix filled by row using the numbers one through six. Now let's enter `T` into the function `t`: 
+As expected, printing `T` returns a $2 \times 3$ matrix filled by row using the numbers one through six. Now let's enter `T` into the function `t()`: 
 
 ```{r printFunctionT}
 # Call defined function t with argument T
 t(T)
 ```
 
-Since `t` is a function we have defined in our workspace (global environment), `t()` takes `T` as an argument input and returns a column vector containing the numbers one through six (note: `t` and `T` are different objects, because `R` is case sensitive). The transpose function `t()` from the base environment is now masked by our own function, saved in the global environment and now is just an alias of `matrix()` (as we defined it). Since the `matrix()` function has the default value `ncol = 1` and we were not giving any argument, it creates a matrix out of the data from `T` (values $1$ to $6$) and put it in just one column.
+Since `t()` is a function we have defined in our workspace (global environment), `t()` takes `T` as an argument input and returns a column vector containing the numbers one through six (note: `t` and `T` are different objects, because `R` is case sensitive). The transpose function `t()` from the base environment is now masked by our own function, saved in the global environment and now is just an alias of `matrix` (as we defined it). Since the `matrix` function has the default value `ncol = 1` and we were not giving any argument, it creates a matrix out of the data from `T` (values $1$ to $6$) and put it in just one column.
 
 Let's now see what would happen if we had defined `T` as `t` instead:
 
-```{r nameMasking}
+```{r nameMasking1}
 # Define a function t in the global environment
+# This function simply passes its arguments to the function “matrix”
 t <- function(...) matrix(...)
 
-# We now define t as the following matrix using the t function from above
-t <- t(1:6, ncol = 3, byrow = TRUE)
-# Although we used the function t to define the new matrix t
-# both are defined in the global environment
+# Check the class of object t in the global environment
+class(.GlobalEnv$t)
+```
 
-# Call defined function t with argument t
+We can see from checking the class of the object `t` in our global environment, that `t` is a `function`.
+
+```{r nameMasking2}
+# Define t as the following matrix using the t function from above
+t <- t(1:6, ncol = 3, byrow = TRUE)
+
+# Check the class of object t in the global environment again
+class(.GlobalEnv$t)
+```
+
+Since two objects (independent of their type) cannot have the same name within an environment, the new matrix `t` overwrites the original function. In our global environment, `t` is now a defined matrix and no longer a function as it was replaced. (which we can see from calling `class` on `.GlobalEnv$t` again which now returns `"matrix"`) The search path should now move higher, until it finds a function `t()`, defined as the transpose function (as seen earlier), in the base environment. We therefore expect to receive the same result as in the previous exercise when printing `t(t)` here.
+
+```{r nameMasking3}
+# Call function t with argument t
 t(t)
 ```
 
-Since two objects (independent of their type) cannot have the same name within our global environment, the new matrix `t` overwrites the original function. In our global environment, `t` is now a defined matrix and no longer a function, as it was replaced. The search path now moves down (looks earlier on the path), until it finds `t`, defined as the transpose function (seen earlier), in the base environment. It is therefore clear why we receive the same result as in the previous exercise when printing `t(t)` here.  
+As expected, the transpose of `t` is again returned.
 
-This entire concept can be referred to as *name masking*. We can think of the transpose function `t` in the base environment as the *original* function. Each time a new object `t` is created in later environments, the original is *masked*, but not overwritten. So if the search path is led back to the base environment, the original function can still be located. 
+This entire concept can be referred to as *name masking*. We can think of the transpose function `t()` in the base environment as the *original* function. Each time a new object `t` is created in later environments, the original is *masked*, but not overwritten. So if the search path is led back to the base environment, the original function can still be located. 
 
 ### Dynamic lookup
 
@@ -382,19 +398,19 @@ x <- 5
 f(2)  # Call 2
 ```
 
-As mentioned in the comments, we first define a well defined function `f()`. The function has two arguments, where `x` has no default and `y` has a default which depends on the local `x`: `y = x + 1`. If we set a global variable `x` (i.e. in the global environment), it will not be used in the function, unless we pass it as an argument, which is not the case here. In both calls, *call 1* and *call 2*, we pass $2$ as an argument, which leads to the same result in both cases. The global variables `x` are not used at all.
+As mentioned in the comments, we first define a well defined function `f`. The function has two arguments, where `x` has no default and `y` has a default which depends on the local `x`: `y = x + 1`. If we set a global variable `x` (i.e. in the global environment), it will not be used in the function, unless we pass it as an argument, which is not the case here. In both calls, *call 1* and *call 2*, we pass $2$ as the value for the argument `x`, which leads to the same result in both cases. The global variable `x` is not used at all.
 
 ```{r dynamicLookup2}
 # We define a function with one argument
 # which is NOT well defined (variable x is not local)
 f <- function(y = x + 1) x + y
 
-# We set variable x to 3 and overwrite the default argument with 2
+# We set the (global) variable x to 3 and overwrite the default argument with 2
 # to see that we use the global variable
 x <- 3
 f(2)  # Call 3
 
-# We set variable x to 5 and overwrite the default argument with 2
+# We set the (global) variable x to 5 and overwrite the default argument with 2
 # to see that we use the global variable again
 x <- 5
 f(2)  # Call 4
@@ -404,7 +420,7 @@ f(2)  # Call 4
 f()  # Call 5
 ```
 
-As mentioned in the comments, we first define a function `f()` which is *not* well defined. The function has one argument `y` which has a default that depends on the global `x`. The formula for `y` is the same as before: `y = x + 1`. In this case we *must* set a global variable `x`, otherwise we will run into errors, such as `Error in f(2) : object 'x' not found`.
+As mentioned in the comments, we first define a function `f` which now is *not* well defined. The function has one argument `y` which has a default that depends on the global `x` if not specified explicitly. The formula for `y` is the same as before: `y = x + 1`. In this case we *must* set a global variable `x`, otherwise we will run into errors, such as `Error in f(2) : object 'x' not found`.
 
 In *call 3* we set the argument `y` to $2$. Inside of the function the pre-defined global variable `x` is used, which is set to $3$. The function calculates `x + y` which is $3 + 2 = 5$ in this case.
 
@@ -412,4 +428,4 @@ In *call 4* we set the argument `y` to $2$ again. Inside of the function the pre
 
 In *call 5* we use the default argument `y = x + 1`, which depends on global `x`. Inside of the function the output formula changes to `x + x + 1`, which depends on the pre-defined global variable `x` again, which is still set to $5$. The calculation $5 + 5 + 1$ results in $11$.
 
-Although we can often get away with using functions that are not well defined, we should nevertheless always use them to avoid errors and prevent unexpected or inconsistent results.
+Although we can often get away with using functions that are not well defined, we should nevertheless avoid using them in order to avoid errors and prevent unexpected or inconsistent results.

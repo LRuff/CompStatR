@@ -13,7 +13,6 @@
     \usepackage{fontspec}
   \fi
   \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
-  \newcommand{\euro}{€}
 \fi
 % use upquote if available, for straight quotes in verbatim environments
 \IfFileExists{upquote.sty}{\usepackage{upquote}}{}
@@ -24,7 +23,6 @@
 }{}
 \usepackage[margin=1in]{geometry}
 \usepackage{hyperref}
-\PassOptionsToPackage{usenames,dvipsnames}{color} % color is loaded by hyperref
 \hypersetup{unicode=true,
             pdftitle={CompStat/R - Paper 2},
             pdfauthor={Group 2: Carlo Michaelis, Patrick Molligo, Lukas Ruff},
@@ -80,12 +78,25 @@
 % margins by default, and it is still possible to overwrite the defaults
 % using explicit options in \includegraphics[width, height, ...]{}
 \setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
 \setlength{\emergencystretch}{3em}  % prevent overfull lines
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 \setcounter{secnumdepth}{0}
+% Redefines (sub)paragraphs to behave more like sections
+\ifx\paragraph\undefined\else
+\let\oldparagraph\paragraph
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+\let\oldsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
 
 %%% Use protect on footnotes to avoid problems with footnotes in titles
 \let\rmarkdownfootnote\footnote%
@@ -111,18 +122,6 @@
   \predate{\centering\large\emph}
   \postdate{\par}
   \date{21 June 2016}
-
-
-
-% Redefines (sub)paragraphs to behave more like sections
-\ifx\paragraph\undefined\else
-\let\oldparagraph\paragraph
-\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
-\fi
-\ifx\subparagraph\undefined\else
-\let\oldsubparagraph\subparagraph
-\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
-\fi
 
 \begin{document}
 \maketitle
@@ -189,12 +188,12 @@ standard deviation and the standard error of \texttt{x}.
   \CommentTok{#   x: numeric vector}
   \CommentTok{#}
   \CommentTok{# Returns:}
-  \CommentTok{#   a numerical vector containing mean, variance, standard deviation}
+  \CommentTok{#   a named numerical vector containing mean, variance, standard deviation}
   \CommentTok{#   and standard error of x}
   
-  \CommentTok{# We check if x is numeric vector}
+  \CommentTok{# We check if x is a numeric vector}
   \CommentTok{# If not: stop and throw error}
-  \NormalTok{if( !}\KeywordTok{is.numeric}\NormalTok{(x) ) \{}
+  \NormalTok{if (!}\KeywordTok{is.numeric}\NormalTok{(x)) \{}
     \KeywordTok{stop}\NormalTok{(}\StringTok{"Argument needs to be numeric."}\NormalTok{)}
   \NormalTok{\}}
   
@@ -262,15 +261,15 @@ function will return a vector with \texttt{NA}s:
 ##   NA   NA   NA   NA
 \end{verbatim}
 
-The reason for the result is that the functions \texttt{mean()},
-\texttt{var()} and \texttt{sd()} use \texttt{na.rm\ =\ FALSE} as
-default, which means that missing values are not removed. If the vector
-\texttt{x} contains a missing value, the \texttt{mean()} function (as
-well as \texttt{var()} and \texttt{sd()}) will just return \texttt{NA}
-to inform about missing values. In the case of calculating standard
-error we use the result from our \texttt{sd()} function and calculate an
-\texttt{NA} value with some other numeric values, which will ultimately
-result in \texttt{NA} again.
+The reason for the result is that the functions \texttt{mean},
+\texttt{var} and \texttt{sd} use \texttt{na.rm\ =\ FALSE} as default,
+which means that missing values are not removed. If the vector
+\texttt{x} contains a missing value, the \texttt{mean} function (as well
+as \texttt{var} and \texttt{sd}) will just return \texttt{NA} to inform
+about missing values. In the case of calculating standard error we use
+the result from our \texttt{sd} function and calculate an \texttt{NA}
+value with some other numeric values, which will ultimately result in
+\texttt{NA} again.
 
 To solve the problem, we can add \texttt{na.rm\ =\ TRUE} to these three
 functions. To make this optional, we will improve the
@@ -279,20 +278,23 @@ functions. To make this optional, we will improve the
 \begin{Shaded}
 \begin{Highlighting}[]
 \NormalTok{meanVarSdSe <-}\StringTok{ }\NormalTok{function(x, ...) \{}
-  \CommentTok{# Expects a numeric vector and flag to handle missing values as an argument}
-  \CommentTok{# and returns the mean, the variance, the standard deviation}
-  \CommentTok{# and the standard error}
+  \CommentTok{# Expects a numeric vector as an argument and returns the mean, the variance,}
+  \CommentTok{# the standard deviation and the standard error. }
+  \CommentTok{# Other arguments are possible via the “...” argument (e.g. a flag to handle}
+  \CommentTok{# missing values)}
   \CommentTok{# }
   \CommentTok{# Args:}
-  \CommentTok{#   x: numeric vector, na.rm: boolean}
+  \CommentTok{#   x:    numeric vector}
+  \CommentTok{#   ...:  optional other arguments passed along to contained functions}
+  \CommentTok{#         (e.g na.rm)}
   \CommentTok{#}
   \CommentTok{# Returns:}
-  \CommentTok{#   a numerical vector containing mean, variance, standard deviation}
+  \CommentTok{#   a named numerical vector containing mean, variance, standard deviation}
   \CommentTok{#   and standard error of x}
   
-  \CommentTok{# We check if x is numeric vector}
+  \CommentTok{# We check if x is a numeric vector}
   \CommentTok{# If not: stop and throw error}
-  \NormalTok{if( !}\KeywordTok{is.numeric}\NormalTok{(x) ) \{}
+  \NormalTok{if (!}\KeywordTok{is.numeric}\NormalTok{(x)) \{}
     \KeywordTok{stop}\NormalTok{(}\StringTok{"Argument needs to be numeric."}\NormalTok{)}
   \NormalTok{\}}
   
@@ -300,7 +302,7 @@ functions. To make this optional, we will improve the
   \NormalTok{y <-}\StringTok{ }\KeywordTok{vector}\NormalTok{()}
   
   \CommentTok{# Calculate mean, variance, standard deviation and standard error}
-  \CommentTok{# and save it in y}
+  \CommentTok{# and save it in y. Further arguments enabled via the “...” argument.}
   \NormalTok{y[}\DecValTok{1}\NormalTok{] <-}\StringTok{ }\KeywordTok{mean}\NormalTok{(x, ...)}
   \NormalTok{y[}\DecValTok{2}\NormalTok{] <-}\StringTok{ }\KeywordTok{var}\NormalTok{(x, ...)}
   \NormalTok{y[}\DecValTok{3}\NormalTok{] <-}\StringTok{ }\KeywordTok{sd}\NormalTok{(x, ...)}
@@ -315,17 +317,18 @@ functions. To make this optional, we will improve the
 \end{Highlighting}
 \end{Shaded}
 
-We define the function with an ellipse \texttt{...}. Our function can
-now receive multiple arguments after the first input \texttt{x}. These
-arguments are used in \texttt{mean()}, \texttt{var()} and \texttt{sd()}.
-If we want to remove missing values in all of these functions (to get a
-result in the case of missing values), we can pass
-\texttt{na.rm\ =\ TRUE} as another argument, such as here:
-\texttt{meanVarSdSe(x,\ na.rm\ =\ TRUE)}. We just have to be aware of
-\texttt{length(x)} in this case. If we want to have the same result as
-above we have to remove the sum of \texttt{NA} values from the length of
-\texttt{x}. Otherwise the function will calculate a different result
-than in Part I, because then lentgh differs.
+We define the function with the \texttt{...} argument which technically
+is called an ellipsis. Our function can now receive multiple arguments
+after the first input \texttt{x}. These arguments are used in
+\texttt{mean}, \texttt{var} and \texttt{sd}. If we want to remove
+missing values in all of these functions (to get a result in the case of
+missing values), we can pass \texttt{na.rm\ =\ TRUE} as another
+argument, such as here: \texttt{meanVarSdSe(x,\ na.rm\ =\ TRUE)}. We
+just have to be aware of \texttt{length(x)} in this case. If we want to
+have the same result as above we have to remove the sum of \texttt{NA}
+values from the length of \texttt{x}. Otherwise the function will
+calculate a different result than in Part I, because then the length
+differs.
 
 Let's confirm the result:
 
@@ -349,25 +352,25 @@ with missing values in \texttt{meanVarSdSe}.
 \begin{Highlighting}[]
 \NormalTok{meanVarSdSe <-}\StringTok{ }\NormalTok{function(x) \{}
   \CommentTok{# Expects a numeric vector as an argument and returns the mean,}
-  \CommentTok{# the variance, the standard deviation and the standard error}
-  \CommentTok{# it also removes missing values if x contains some}
+  \CommentTok{# the variance, the standard deviation and the standard error.}
+  \CommentTok{# It also removes missing values if x contains any}
   \CommentTok{# }
   \CommentTok{# Args:}
   \CommentTok{#   x: numeric vector}
   \CommentTok{#}
   \CommentTok{# Returns:}
-  \CommentTok{#   a numerical vector containing mean, variance, standard deviation}
+  \CommentTok{#   a named numerical vector containing mean, variance, standard deviation}
   \CommentTok{#   and standard error of x}
   
-  \CommentTok{# We check if x is numeric vector}
+  \CommentTok{# We check if x is a numeric vector}
   \CommentTok{# If not: stop and throw error}
-  \NormalTok{if( !}\KeywordTok{is.numeric}\NormalTok{(x) ) \{}
+  \NormalTok{if (!}\KeywordTok{is.numeric}\NormalTok{(x)) \{}
     \KeywordTok{stop}\NormalTok{(}\StringTok{"Argument needs to be numeric."}\NormalTok{)}
   \NormalTok{\}}
   
   \CommentTok{# We check if x contains missing values}
-  \CommentTok{# If so: remove missing values using dropNA}
-  \NormalTok{if( }\KeywordTok{sum}\NormalTok{(}\KeywordTok{is.na}\NormalTok{(x)) >}\StringTok{ }\DecValTok{0} \NormalTok{) \{}
+  \CommentTok{# If so: remove missing values using dropNa}
+  \NormalTok{if (}\KeywordTok{sum}\NormalTok{(}\KeywordTok{is.na}\NormalTok{(x)) >}\StringTok{ }\DecValTok{0}\NormalTok{) \{}
     \NormalTok{x <-}\StringTok{ }\KeywordTok{dropNa}\NormalTok{(x)}
   \NormalTok{\}}
   
@@ -392,8 +395,8 @@ with missing values in \texttt{meanVarSdSe}.
 
 We used the function from Part I and added a condition which checks if
 we have missing values in \texttt{x}, using \texttt{is.na}. If the sum
-of \texttt{NA} values is greater than \(0\) (i.e.,if there is one or
-more missing value), we use the function \texttt{dropNA} from the first
+of \texttt{NA} values is greater than \(0\) (i.e.~if there is one or
+more missing value), we use the function \texttt{dropNa} from the first
 exercise to remove all missing values. The remaining code of the
 function can remain as above in Part I.
 
@@ -418,13 +421,13 @@ function should behave like the logical operator \texttt{\textbar{}}.
 \begin{Shaded}
 \begin{Highlighting}[]
 \CommentTok{# Define infix function %or%}
-\StringTok{`}\DataTypeTok{%or%}\StringTok{`} \NormalTok{<-}\StringTok{ }\NormalTok{function(a, b) \{}
-  \CommentTok{# Check if vector a and b is logical}
-  \NormalTok{if( !(}\KeywordTok{is.logical}\NormalTok{(a) &}\StringTok{ }\KeywordTok{is.logical}\NormalTok{(b)) ) \{}
-    \KeywordTok{stop}\NormalTok{(}\StringTok{"a and/or b have to be logical vectors."}\NormalTok{)}
+\StringTok{'%or%'} \NormalTok{<-}\StringTok{ }\NormalTok{function(a, b) \{}
+  \CommentTok{# Check if vectors a and b are logical}
+  \NormalTok{if (!(}\KeywordTok{is.logical}\NormalTok{(a) &}\StringTok{ }\KeywordTok{is.logical}\NormalTok{(b))) \{}
+    \KeywordTok{stop}\NormalTok{(}\StringTok{"a and b have to be logical vectors."}\NormalTok{)}
   \NormalTok{\}}
   
-  \CommentTok{# Use ifelse to calculate result and return it directly}
+  \CommentTok{# Use ifelse to calculate the result and return it directly.}
   \CommentTok{# If the sum of the entry of vector a and the entry of vector b}
   \CommentTok{# is greater than or equal to 1, set result to TRUE, otherwise to FALSE}
   \KeywordTok{ifelse}\NormalTok{(a +}\StringTok{ }\NormalTok{b >=}\StringTok{ }\DecValTok{1}\NormalTok{,  }\OtherTok{TRUE}\NormalTok{, }\OtherTok{FALSE}\NormalTok{)}
@@ -432,16 +435,17 @@ function should behave like the logical operator \texttt{\textbar{}}.
 \end{Highlighting}
 \end{Shaded}
 
-First we check if we have logical vectors. If \texttt{a} and/or
-\texttt{b} are not logical, we leave the function and throw an error.
-Otherwise we can calculate the \texttt{or} operation using the
+First we check if we have logical vectors. If either \texttt{a} or
+\texttt{b} (or both) are not logical, we leave the function and throw an
+error. Otherwise we can calculate the \texttt{or} operation using the
 \texttt{ifelse} function and return the result directly after
-calculation. Inside of the \texttt{ifelse} function, the first argument
-checks the condition if the sum of the values \texttt{a} and \texttt{b}
-are greater than or equal to \(1\), where \texttt{TRUE} is equal to
-\(1\) and \texttt{FALSE} is equal to \(0\).
+calculation. Inside the \texttt{ifelse} function, the first argument
+checks element-wise the condition if the sum of the respective elements
+of \texttt{a} and \texttt{b} are greater than or equal to \(1\). If the
+condition is fulfilled we return \texttt{TRUE}; otherwise we return
+\texttt{FALSE}. (which is the case if the sum is equal to \(0\))
 
-To confirm the function, we test an example:
+To check our implementation, we test an example:
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -484,8 +488,8 @@ example:
   \CommentTok{# With no specified argument inputs, the function f follows the search path}
   \CommentTok{# and locates values for x and y in the global environment}
 \NormalTok{g <-}\StringTok{ }\NormalTok{function(}\DataTypeTok{x =} \DecValTok{2}\NormalTok{, }\DataTypeTok{y =} \NormalTok{x) x *}\StringTok{ }\NormalTok{y}
-  \CommentTok{# A new environment is created within the function g, where arguments for x and y}
-  \CommentTok{# are clearly defined}
+  \CommentTok{# A new environment is created within the function g, where arguments for x}
+  \CommentTok{# and y are clearly defined}
 \end{Highlighting}
 \end{Shaded}
 
@@ -515,22 +519,28 @@ Although both functions \texttt{f} and \texttt{g} depend on values for
 \end{verbatim}
 
 Beginning with function \texttt{f}, if we follow the search path we
-begin in the temporary local environment within the function itself.
-Since there is no information regarding the values of \texttt{x} and
-\texttt{y}, \texttt{R} moves to the parent environment, which is the
-global environment in this case. In the global environment, \texttt{x}
-takes the value of \(5\) and \texttt{y} takes the value of \(7\). Thus,
-the function returns \(5 \cdot 7=35\).
+begin in the local environment within the function itself. Since there
+are no objects \texttt{x} and \texttt{y} in the local environment of
+\texttt{f}, \texttt{R} moves to the parent environment, which is the
+global environment in this case. In the global environment \texttt{x}
+and \texttt{y} were defined, where \texttt{x} takes the value of \(5\)
+and \texttt{y} takes the value of \(7\). Thus, \texttt{f} returns
+\(5 \cdot 7=35\).
 
 For function \texttt{g} the search path also begins in the local
-environment within the function itself. However, in this case there is a
-defined value for \texttt{x}, as well as an expression defining a value
-for \texttt{y} based on \texttt{x}. The search path ends and the
-function returns \(2 \cdot 2=4\).
+environment within the function itself. However, in this case \texttt{x}
+and \texttt{y} are defined in the local environment by specifying
+\texttt{x} and \texttt{y} as arguments of \texttt{g} with default values
+of \texttt{x\ =\ 2} and \texttt{y\ =\ x}, that is \texttt{y} is assigned
+the value of \texttt{x} of the \emph{local} environment of \texttt{g} if
+not specified otherwise. If we call \texttt{g} without specifying the
+arguments, the default values from the function-definition are used and
+hence the function returns \(2 \cdot 2=4\) and the search path ends in
+the local environment.
 
-By manipulating the arguments of a function, it is also possible to
-alter the original search path. We see this when calling the following
-function:
+By specifying the arguments of \texttt{g} explicitly, it is possible to
+assign values to the objects of the local environment of \texttt{g}. We
+see this when calling the following function:
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -543,16 +553,15 @@ function:
 ## [1] 10
 \end{verbatim}
 
-Looking back at the code for function \texttt{g}, we see the two
-arguments \texttt{x} and \texttt{y}. When calling \texttt{g(y\ =\ x)}
-however, we are omitting the first argument \texttt{x}, which then
-defaults to the value \(2\), defined in the local environment of the
-function.\\
-When we simply call \texttt{g()}, the \texttt{y\ =\ x} argument also
-defaults to a local value dependent on local \texttt{x}. But by inputing
-the argument \texttt{y\ =\ x} manually while calling, we send the search
-path to the global environment where \texttt{x} takes the global value
-of \(5\). Thus the function returns \(2 \cdot 5=10\).
+Since we assign a value to the \texttt{y} argument specifically,
+\texttt{y} does not adopt its default value, but the value specified. If
+the value assigned is a variable, this variable is searched for in the
+environment, where the function is called from, i.e.~the global
+environment. Because we have assigned \texttt{x\ =\ 5} in the global
+environment, we pass the value of \(5\) to the argument \texttt{y} of
+function \texttt{g}. We are omitting the first argument \texttt{x},
+which defaults to the value \(2\). Thus the function returns
+\(2 \cdot 5=10\).
 
 \subsubsection{Scoping II}\label{scoping-ii}
 
@@ -560,12 +569,12 @@ In this exercise we once again see the importance of understanding the
 search path and how \texttt{R} carries out tasks according to the
 environment in which it is working. Especially important is the
 \emph{naming} of objects and functions. As discussed in the previous
-section, the ultimate parent environment to use is
-\texttt{package:base}, which contains the commonly used and most
-fundamental functions in \texttt{R}. Since the global environment
-(workspace) is separate from \texttt{package:base}, it is possible to
-name new objects in the workspace using previously defined functions
-from the base. As long as there is no overlap \emph{within} an
+section, the ultimate parent environment used is \texttt{package:base},
+which contains the commonly used and most fundamental functions in
+\texttt{R}. Since the global environment (workspace) is separate from
+\texttt{package:base}, it is possible to name new objects in the
+workspace using previously defined names from objects and functions from
+the base environment. As long as there is no overlap \emph{within} an
 enviornment, nothing will be overwritten, it will just be masked. In the
 following example we see again why the search path is so important when
 defining objects:
@@ -588,12 +597,12 @@ defining objects:
 \end{verbatim}
 
 As expected, printing \texttt{t} returns a \(2\times3\) matrix filled by
-row using the numbers one through six. Let's see what happens if we
-treat \texttt{t} like a function:
+row using the numbers one through six. Let's see what happens if we run
+the following code:
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\CommentTok{# Print t(t), which should transpose matrix t}
+\CommentTok{# Print t(t), which transposes matrix t}
 \KeywordTok{t}\NormalTok{(t)}
 \end{Highlighting}
 \end{Shaded}
@@ -608,28 +617,31 @@ treat \texttt{t} like a function:
 The result is a \(3\times2\) matrix filled by column using the numbers
 one through six. In other words, we have printed the transpose of the
 original matrix \texttt{t}, which we had defined in the global
-environment. Since \texttt{t} is a defined matrix and not a function,
-\texttt{R} will ignore the \texttt{t} in the global environment while
-searching for function \texttt{t}. \texttt{R} follows the search path
-from the global environment to the earlier parents and finds function
-\texttt{t} in \texttt{package:base}. In the base environment, the
-function \texttt{t()} returns the transpose of the given matrix.
+environment. When calling \texttt{t()}, the brackets are an indicator
+for \texttt{R}, that a function named \texttt{t} should be called. Since
+the object \texttt{t} in our workspace is of object-class matrix and not
+a function, \texttt{R} will ignore the \texttt{t} in the global
+environment while searching for function \texttt{t()}. \texttt{R}
+follows the search path from the global environment to the higher
+parents and finds function \texttt{t()} in \texttt{package:base}. In the
+base environment. The function \texttt{t()} returns the transpose of the
+given matrix.
 
 \subsubsection{Scoping III}\label{scoping-iii}
 
 In the previous exercises we observed how \texttt{R} searches through a
 chain of environments to locate objects and information. In this next
 exercise, we investigate what happens when different objects are defined
-identically within the \emph{same} environment. Here we are defining
-objects in the global environment (workspace):
+with identical names within the \emph{same} environment. Here we are
+defining objects in the global environment (workspace):
 
 \begin{Shaded}
 \begin{Highlighting}[]
 \CommentTok{# Define a function t in the global environment}
+\CommentTok{# This function simply passes its arguments to the function “matrix”}
 \NormalTok{t <-}\StringTok{ }\NormalTok{function(...) }\KeywordTok{matrix}\NormalTok{(...)}
 
-\CommentTok{# Define a matrix T using the above t function}
-\CommentTok{# with the desired input arguments}
+\CommentTok{# Define a matrix T using the above function t with the desired input arguments}
 \NormalTok{T <-}\StringTok{ }\KeywordTok{t}\NormalTok{(}\DecValTok{1}\NormalTok{:}\DecValTok{6}\NormalTok{, }\DataTypeTok{ncol =} \DecValTok{3}\NormalTok{, }\DataTypeTok{byrow =} \OtherTok{TRUE}\NormalTok{)}
 
 \CommentTok{# Print result of T}
@@ -645,7 +657,7 @@ objects in the global environment (workspace):
 
 As expected, printing \texttt{T} returns a \(2 \times 3\) matrix filled
 by row using the numbers one through six. Now let's enter \texttt{T}
-into the function \texttt{t}:
+into the function \texttt{t()}:
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -664,14 +676,14 @@ into the function \texttt{t}:
 ## [6,]    6
 \end{verbatim}
 
-Since \texttt{t} is a function we have defined in our workspace (global
-environment), \texttt{t()} takes \texttt{T} as an argument input and
-returns a column vector containing the numbers one through six (note:
-\texttt{t} and \texttt{T} are different objects, because \texttt{R} is
-case sensitive). The transpose function \texttt{t()} from the base
-environment is now masked by our own function, saved in the global
-environment and now is just an alias of \texttt{matrix()} (as we defined
-it). Since the \texttt{matrix()} function has the default value
+Since \texttt{t()} is a function we have defined in our workspace
+(global environment), \texttt{t()} takes \texttt{T} as an argument input
+and returns a column vector containing the numbers one through six
+(note: \texttt{t} and \texttt{T} are different objects, because
+\texttt{R} is case sensitive). The transpose function \texttt{t()} from
+the base environment is now masked by our own function, saved in the
+global environment and now is just an alias of \texttt{matrix} (as we
+defined it). Since the \texttt{matrix} function has the default value
 \texttt{ncol\ =\ 1} and we were not giving any argument, it creates a
 matrix out of the data from \texttt{T} (values \(1\) to \(6\)) and put
 it in just one column.
@@ -682,14 +694,49 @@ Let's now see what would happen if we had defined \texttt{T} as
 \begin{Shaded}
 \begin{Highlighting}[]
 \CommentTok{# Define a function t in the global environment}
+\CommentTok{# This function simply passes its arguments to the function “matrix”}
 \NormalTok{t <-}\StringTok{ }\NormalTok{function(...) }\KeywordTok{matrix}\NormalTok{(...)}
 
-\CommentTok{# We now define t as the following matrix using the t function from above}
-\NormalTok{t <-}\StringTok{ }\KeywordTok{t}\NormalTok{(}\DecValTok{1}\NormalTok{:}\DecValTok{6}\NormalTok{, }\DataTypeTok{ncol =} \DecValTok{3}\NormalTok{, }\DataTypeTok{byrow =} \OtherTok{TRUE}\NormalTok{)}
-\CommentTok{# Although we used the function t to define the new matrix t}
-\CommentTok{# both are defined in the global environment}
+\CommentTok{# Check the class of object t in the global environment}
+\KeywordTok{class}\NormalTok{(.GlobalEnv$t)}
+\end{Highlighting}
+\end{Shaded}
 
-\CommentTok{# Call defined function t with argument t}
+\begin{verbatim}
+## [1] "function"
+\end{verbatim}
+
+We can see from checking the class of the object \texttt{t} in our
+global environment, that \texttt{t} is a \texttt{function}.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Define t as the following matrix using the t function from above}
+\NormalTok{t <-}\StringTok{ }\KeywordTok{t}\NormalTok{(}\DecValTok{1}\NormalTok{:}\DecValTok{6}\NormalTok{, }\DataTypeTok{ncol =} \DecValTok{3}\NormalTok{, }\DataTypeTok{byrow =} \OtherTok{TRUE}\NormalTok{)}
+
+\CommentTok{# Check the class of object t in the global environment again}
+\KeywordTok{class}\NormalTok{(.GlobalEnv$t)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "matrix"
+\end{verbatim}
+
+Since two objects (independent of their type) cannot have the same name
+within an environment, the new matrix \texttt{t} overwrites the original
+function. In our global environment, \texttt{t} is now a defined matrix
+and no longer a function as it was replaced. (which we can see from
+calling \texttt{class} on \texttt{.GlobalEnv\$t} again which now returns
+\texttt{"matrix"}) The search path should now move higher, until it
+finds a function \texttt{t()}, defined as the transpose function (as
+seen earlier), in the base environment. We therefore expect to receive
+the same result as in the previous exercise when printing \texttt{t(t)}
+here.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Call function t with argument t}
 \KeywordTok{t}\NormalTok{(t)}
 \end{Highlighting}
 \end{Shaded}
@@ -701,17 +748,10 @@ Let's now see what would happen if we had defined \texttt{T} as
 ## [3,]    3    6
 \end{verbatim}
 
-Since two objects (independent of their type) cannot have the same name
-within our global environment, the new matrix \texttt{t} overwrites the
-original function. In our global environment, \texttt{t} is now a
-defined matrix and no longer a function, as it was replaced. The search
-path now moves down (looks earlier on the path), until it finds
-\texttt{t}, defined as the transpose function (seen earlier), in the
-base environment. It is therefore clear why we receive the same result
-as in the previous exercise when printing \texttt{t(t)} here.
+As expected, the transpose of \texttt{t} is again returned.
 
 This entire concept can be referred to as \emph{name masking}. We can
-think of the transpose function \texttt{t} in the base environment as
+think of the transpose function \texttt{t()} in the base environment as
 the \emph{original} function. Each time a new object \texttt{t} is
 created in later environments, the original is \emph{masked}, but not
 overwritten. So if the search path is led back to the base environment,
@@ -762,14 +802,14 @@ example:
 \end{verbatim}
 
 As mentioned in the comments, we first define a well defined function
-\texttt{f()}. The function has two arguments, where \texttt{x} has no
+\texttt{f}. The function has two arguments, where \texttt{x} has no
 default and \texttt{y} has a default which depends on the local
 \texttt{x}: \texttt{y\ =\ x\ +\ 1}. If we set a global variable
 \texttt{x} (i.e.~in the global environment), it will not be used in the
 function, unless we pass it as an argument, which is not the case here.
-In both calls, \emph{call 1} and \emph{call 2}, we pass \(2\) as an
-argument, which leads to the same result in both cases. The global
-variables \texttt{x} are not used at all.
+In both calls, \emph{call 1} and \emph{call 2}, we pass \(2\) as the
+value for the argument \texttt{x}, which leads to the same result in
+both cases. The global variable \texttt{x} is not used at all.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -777,7 +817,7 @@ variables \texttt{x} are not used at all.
 \CommentTok{# which is NOT well defined (variable x is not local)}
 \NormalTok{f <-}\StringTok{ }\NormalTok{function(}\DataTypeTok{y =} \NormalTok{x +}\StringTok{ }\DecValTok{1}\NormalTok{) x +}\StringTok{ }\NormalTok{y}
 
-\CommentTok{# We set variable x to 3 and overwrite the default argument with 2}
+\CommentTok{# We set the (global) variable x to 3 and overwrite the default argument with 2}
 \CommentTok{# to see that we use the global variable}
 \NormalTok{x <-}\StringTok{ }\DecValTok{3}
 \KeywordTok{f}\NormalTok{(}\DecValTok{2}\NormalTok{)  }\CommentTok{# Call 3}
@@ -790,7 +830,7 @@ variables \texttt{x} are not used at all.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\CommentTok{# We set variable x to 5 and overwrite the default argument with 2}
+\CommentTok{# We set the (global) variable x to 5 and overwrite the default argument with 2}
 \CommentTok{# to see that we use the global variable again}
 \NormalTok{x <-}\StringTok{ }\DecValTok{5}
 \KeywordTok{f}\NormalTok{(}\DecValTok{2}\NormalTok{)  }\CommentTok{# Call 4}
@@ -813,11 +853,11 @@ variables \texttt{x} are not used at all.
 ## [1] 11
 \end{verbatim}
 
-As mentioned in the comments, we first define a function \texttt{f()}
-which is \emph{not} well defined. The function has one argument
-\texttt{y} which has a default that depends on the global \texttt{x}.
-The formula for \texttt{y} is the same as before:
-\texttt{y\ =\ x\ +\ 1}. In this case we \emph{must} set a global
+As mentioned in the comments, we first define a function \texttt{f}
+which now is \emph{not} well defined. The function has one argument
+\texttt{y} which has a default that depends on the global \texttt{x} if
+not specified explicitly. The formula for \texttt{y} is the same as
+before: \texttt{y\ =\ x\ +\ 1}. In this case we \emph{must} set a global
 variable \texttt{x}, otherwise we will run into errors, such as
 \texttt{Error\ in\ f(2)\ :\ object\ \textquotesingle{}x\textquotesingle{}\ not\ found}.
 
@@ -838,7 +878,8 @@ pre-defined global variable \texttt{x} again, which is still set to
 \(5\). The calculation \(5 + 5 + 1\) results in \(11\).
 
 Although we can often get away with using functions that are not well
-defined, we should nevertheless always use them to avoid errors and
-prevent unexpected or inconsistent results.
+defined, we should nevertheless avoid using them in order to avoid
+errors and prevent unexpected or inconsistent results.
+
 
 \end{document}
