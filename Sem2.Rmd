@@ -251,7 +251,7 @@ c(TRUE, FALSE, TRUE, FALSE) %or% c(TRUE, TRUE, FALSE, FALSE)
 
 ### Scoping I
 
-The main concept behind this exercise is the *Search Path*, which `R` uses to locate objects when called upon. In order for `R` to carry out a command or calculation, it seeks the necessary information according to a hierarchical path of *environments*. Each environment has a *parent*, to which `R` moves if the required information is not yet found. The `R` workspace is known as the *Global Environment* and also has a parent, which is the most recently loaded package. If there are no longer any loaded packages, then the search path *ends* at the final parent environment, the base package (`package:base`) which just has the empty environment as parent.
+The main concept behind this exercise is the *Search Path*, which `R` uses to locate objects when called upon. In order for `R` to carry out a command or calculation, it seeks the necessary information according to a hierarchical path of *environments*. Each environment has a *parent*, to which `R` moves if the required information is not yet found. The `R` workspace is known as the *Global Environment* and also has a parent, which is the most recently loaded package. If there are no longer any loaded packages, then the search path *ends* at the final parent environment, the base package (`package:base`) which just has the empty environment as a parent.
 
 Below we can observe the importance of the search path with a simple example:  
 
@@ -272,20 +272,20 @@ g <- function(x = 2, y = x) x * y
 Although both functions `f` and `g` depend on values for `x` and `y`, they return different results when called:  
 
 ```{r searchPathCalls}
-# call 1
+# Call 1
 f()
-# call 2
+# Call 2
 g()
 ```
 
-Beginning with function `f`, if we follow the search path we begin in the temporal local environment within the function itself. Since there is no information regarding the values of `x` and `y`, `R` moves to the parent environment, which is the global environment in this case. In the global environment, `x` takes the value of $5$ and `y` takes the value of $7$. Thus, the function returns $5 \cdot 7=35$.  
+Beginning with function `f`, if we follow the search path we begin in the temporary local environment within the function itself. Since there is no information regarding the values of `x` and `y`, `R` moves to the parent environment, which is the global environment in this case. In the global environment, `x` takes the value of $5$ and `y` takes the value of $7$. Thus, the function returns $5 \cdot 7=35$.  
 
 For function `g` the search path also begins in the local environment within the function itself. However, in this case there is a defined value for `x`, as well as an expression defining a value for `y` based on `x`. The search path ends and the function returns $2 \cdot 2=4$.  
 
 By manipulating the arguments of a function, it is also possible to alter the original search path. We see this when calling the following function:
 
 ```{r searchPathAlter}
-# call 3
+# Call 3
 g(y = x)
 ```
 
@@ -339,7 +339,7 @@ t(T)
 
 Since `t` is a function we have defined in our workspace (global environment), `t()` takes `T` as an argument input and returns a column vector containing the numbers one through six (note: `t` and `T` are different objects, because `R` is case sensitive). The transpose function `t()` from the base environment is now masked by our own function, saved in the global environment and now is just an alias of `matrix()` (as we defined it). Since the `matrix()` function has the default value `ncol = 1` and we were not giving any argument, it creates a matrix out of the data from `T` (values $1$ to $6$) and put it in just one column.
 
-Let's now see what would happen if we had defined `T` instead as `t`:
+Let's now see what would happen if we had defined `T` as `t` instead:
 
 ```{r nameMasking}
 # Define a function t in the global environment
@@ -354,62 +354,62 @@ t <- t(1:6, ncol = 3, byrow = TRUE)
 t(t)
 ```
 
-Since two objects (independent of their type) cannot have the same name within our global environment, the new matrix `t` overwrites the original function. In our global environment, `t` is now a defined matrix and no longer a function, it was replaced. The search path now moves down (is looking earlier in path), until it finds `t`, defined as the transpose function (seen earlier), in base environment. It is therefore clear why we receive the same result as in the previous exercise when printing `t(t)` here.  
+Since two objects (independent of their type) cannot have the same name within our global environment, the new matrix `t` overwrites the original function. In our global environment, `t` is now a defined matrix and no longer a function, as it was replaced. The search path now moves down (looks earlier on the path), until it finds `t`, defined as the transpose function (seen earlier), in the base environment. It is therefore clear why we receive the same result as in the previous exercise when printing `t(t)` here.  
 
 This entire concept can be referred to as *name masking*. We can think of the transpose function `t` in the base environment as the *original* function. Each time a new object `t` is created in later environments, the original is *masked*, but not overwritten. So if the search path is led back to the base environment, the original function can still be located. 
 
 ### Dynamic lookup
 
-`R` searches for objects while it runs the code, which is called *dynamic lookup*. A well defined function should only process local variables. In other words it should only depend on the given arguments. This property is called *self containment*. If we use not well defined functions, it can lead to inconsistent results or we risk errors. For illustration, we can use the example:
+`R` searches for objects while it runs some given code, which is called *dynamic lookup*. A *well defined* function should only process local variables. In other words a function should only depend on the given arguments. This property is called *self containment*. If we use functions that are not well defined, either we risk errors or we receive inconsistent results. For illustration, we can use the following example:
 
 ```{r dynamicLookup1}
-# first we remove everything from workspace
-# to avoid conflicts with the stuff above
+# First we remove everything from workspace
+# to avoid conflicts with the code above
 rm(list = ls(all.names=TRUE))
 
-# we define a function with two arguments
-# which is well defined, it just processes local variables
+# We define a function with two arguments
+# which is well defined (it just processes local variables)
 f <- function(x, y = x + 1) x + y
 
-# we set variable x to 3 and call the function where the first argument is 2
+# We set variable x to 3 and call the function where the first argument is 2
 # to see that we just use the local variable
 x <- 3
-f(2)  # call 1
+f(2)  # Call 1
 
-# we set variable x to 5 and call the function where the first argument is 2
+# We set variable x to 5 and call the function where the first argument is 2
 # to see that we just use the local variable again
 x <- 5
-f(2)  # call 2
+f(2)  # Call 2
 ```
 
-As mentioned in the comments, we first define a well defined function `f()`. The function has two arguments, where `x` has no default and `y` has a default which depends on the local `x`, where `y = x + 1`. If we set a global variable `x` (in global environment), it will not be used in the function, except we pass it as an argument, which is not the case. In both calls, *call 1* and *call 2*, we pass $2$ as an argument, which leads to the same result in both cases. The global variables `x` are not used at all.
+As mentioned in the comments, we first define a well defined function `f()`. The function has two arguments, where `x` has no default and `y` has a default which depends on the local `x`: `y = x + 1`. If we set a global variable `x` (i.e. in the global environment), it will not be used in the function, unless we pass it as an argument, which is not the case here. In both calls, *call 1* and *call 2*, we pass $2$ as an argument, which leads to the same result in both cases. The global variables `x` are not used at all.
 
 ```{r dynamicLookup2}
-# we define a function with one argument
-# which is NOT well defined, variable x is not local
+# We define a function with one argument
+# which is NOT well defined (variable x is not local)
 f <- function(y = x + 1) x + y
 
-# we set variable x to 3 and overwrite the default argument with 2
+# We set variable x to 3 and overwrite the default argument with 2
 # to see that we use the global variable
 x <- 3
-f(2)  # call 3
+f(2)  # Call 3
 
-# we set variable x to 5 and overwrite the default argument with 2
+# We set variable x to 5 and overwrite the default argument with 2
 # to see that we use the global variable again
 x <- 5
-f(2)  # call 4
+f(2)  # Call 4
 
-# variable x is still set to 5 and we call the function with default argument
+# Variable x is still set to 5 and we call the function with the default argument
 # to see that we use the global variable again
-f()  # call 5
+f()  # Call 5
 ```
 
-As mentioned in the comments, we first define a function `f()` which is *not* well defined. The function has one argument `y` which has a default that depends on the global `x`, where the formula is the same then before `y = x + 1`. In this case we *have* to set a global variable `x`, otherwise we will run into errors, like `Error in f(2) : object 'x' not found`.
+As mentioned in the comments, we first define a function `f()` which is *not* well defined. The function has one argument `y` which has a default that depends on the global `x`. The formula for `y` is the same as before: `y = x + 1`. In this case we *must* set a global variable `x`, otherwise we will run into errors, such as `Error in f(2) : object 'x' not found`.
 
 In *call 3* we set the argument `y` to $2$. Inside of the function the pre-defined global variable `x` is used, which is set to $3$. The function calculates `x + y` which is $3 + 2 = 5$ in this case.
 
 In *call 4* we set the argument `y` to $2$ again. Inside of the function the pre-defined global variable `x` is used again, which is set to $5$ in this case. The function calculates `x + y` which is $5 + 2 = 7$ in this case.
 
-In *call 5* we use the default argument `y = x + 1`, which depends on global `x`. Inside of the function the formula changes to `x + x + 1`, which depends on the pre-defined global variable `x` again, which is still set to $5$. The calculation $5 + 5 + 1$ results in $11$.
+In *call 5* we use the default argument `y = x + 1`, which depends on global `x`. Inside of the function the output formula changes to `x + x + 1`, which depends on the pre-defined global variable `x` again, which is still set to $5$. The calculation $5 + 5 + 1$ results in $11$.
 
-We can state that well defined functions are so nice, that we should always use them.
+Although we can often get away with using functions that are not well defined, we should nevertheless always use them to avoid errors and prevent unexpected or inconsistent results.
