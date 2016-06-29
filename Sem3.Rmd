@@ -1,0 +1,24 @@
+---
+title: "CompStat/R - Paper 3"
+author: "Group 2: Carlo Michaelis, Patrick Molligo, Lukas Ruff"
+date: "06 July 2016"
+fontsize: 11
+lof: false
+graphics: true
+documentclass: article
+output:
+  pdf_document:
+    latex_engine: pdflatex
+    keep_tex: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      warning = FALSE,
+                      message = FALSE)
+```
+
+
+## Part I: Linear regression
+
+## Part II: *S3 for linear models*
