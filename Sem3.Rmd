@@ -55,7 +55,7 @@ The function `linModEst` is a raw implementation of the OLS estimator. The funct
 * `sigma`: the square root of the estimated scale parameter $\hat{\sigma}^2$
 * `df`: the degrees of freedom $df$
 
-We use equations (\ref{eq:1}), (\ref{eq:2}) and (\ref{eq:3}) for the implementation and compute the inverse of $X'X$ using the `solve` function, which numerically solves the equation
+We use equations (\ref{eq:1}), (\ref{eq:2}), and (\ref{eq:3}) for the implementation and compute the inverse of $X'X$ using the `solve` function, which numerically solves the equation
 $$ (X'X) \, A = I $$
 for the matrix $A = (X'X)^{-1}$. To efficiently compute $X'X$ and $X'y$, we use the `crossprod` function.
 
@@ -81,7 +81,7 @@ linModEst <- function(x, y) {
   # Compute the inverse of (x’x) using the solve- and crossprod-function
   inv <- solve(crossprod(x), diag(nrow = ncol(x)))
   
-  # Compute beta, i.e. the estimated coefficients
+  # Compute beta hat, i.e. the estimated coefficients
   coefficients <- inv %*% crossprod(x, y)
   
   # Compute the degrees of freedom
@@ -89,13 +89,13 @@ linModEst <- function(x, y) {
   
   # Compute the sample variance via the sum of squared residuals (SSR)
   SSR <- sum((y - x %*% coefficients)^2)
-  sigma.squared <- SSR / df
+  sigmaSquared <- SSR / df
   
   # Compute the covariance matrix
-  vcov <- sigma.squared * inv
+  vcov <- sigmaSquared * inv
   
-  # Create results list to be returned
-  results <- list(coefficients, vcov, sqrt(sigma.squared), df)
+  # Create named results list to be returned
+  results <- list(coefficients, vcov, sqrt(sigmaSquared), df)
   names(results) <- c("coefficients", "vcov", "sigma", "df")
   
   # Return results
@@ -104,7 +104,7 @@ linModEst <- function(x, y) {
 ```
 
 We test our implementation by computing the linear relationship between heart weight, body weight and sex for the `cats` dataset contained in the package `MASS`. In the following piece of code, `cbind` combines its arguments by columns into a matrix with the number of columns given by the number of arguments and the number of rows given by the greatest length of the given arguments. Shorter arguments are repeated, as long as the matrix number of rows is a multiple of the shorter vector lengths.
-Hence, `cbind(1, cats$Bwt, as.numeric(cats$Sex) - 1)` creates a design matrix with an intercept, the variable body weight (`bwt`) and sex (`Sex`), where the sex variable is converted from factor into a dummy variable. Therefore, `cbind` is used to build a proper design matrix of object type `matrix` with intercept and dummy variable, such that our implementation of `linModEst` works correctly.
+Hence, `cbind(1, cats$Bwt, as.numeric(cats$Sex) - 1)` creates a design matrix with an intercept column, the variable body weight (`bwt`), and the variable sex (`Sex`), which is converted from a factor into a dummy variable using `as.numeric`. We subtract $1$ to receive dummy variable values of $0$ and $1$, rather than $1$ and $2$ from the original data. Thus, `cbind` is used to build a proper design matrix of object type `matrix` with an intercept and dummy variable, such that our implementation of `linModEst` works correctly.
 
 \newpage
 
@@ -119,7 +119,7 @@ linModEst(
 )
 ```
 
-We verify our results by comparing the results to the output of `R`'s `lm` function:
+We verify our results by comparing them to the output of `R`'s `lm` function:
 
 ```{r linModEst Test2}
 summary(lm(Hwt ~ Bwt + Sex, data = cats))
@@ -138,7 +138,7 @@ In this section, we write a new function `linMod(formula, data)`, which estimate
 * `formula`: the formula that represents the model equation
 * `call`: the arguments with which `linMod` was called
 
-Below, we use the `model.frame`, the `model.extract` and `model.matrix` functions which are very convenient for working with objects of the `formula` class. `model.frame` returns a `data.frame` containing only the variables from its passed `data` argument, which are used in the `formula` expression given. The returned `data.frame` from the `model.frame` function has also additional attributes, but those are not needed in our application. With `model.extract`, we are able to extract the response variable from the `data.frame` created by `model.frame`. Moreover, using `model.matrix`, we can create the design matrix (of object class `matrix`) again only from `formula` and `data` arguments. By default, the matrix returned by `model.matrix` includes an intercept and converts factor variables into proper dummy variables (i.e. a factor variable with $L$ levels results in $L-1$ dummy variables). More precisely, the default intercept is taken over from the `formula` object, which by default adds an intercept term to the model equation, if not specified otherwise.
+Below, we use the `model.frame`, `model.extract`, and `model.matrix` functions, which are very convenient for working with objects of the class `formula`. `model.frame` returns a `data.frame` containing only the variables from its passed `data` argument, which are used in the `formula` expression given. The returned `data.frame` from the `model.frame` function has additional attributes, but these are not needed in our application. With `model.extract`, we are able to extract the response variable from the `data.frame` created by `model.frame`. Moreover, using `model.matrix`, we can create the design matrix (of object class `matrix`) again only from `formula` and `data` arguments. By default, the matrix returned by `model.matrix` includes an intercept and converts factor variables into proper dummy variables (i.e. a factor variable with $L$ levels results in $L-1$ dummy variables). More precisely, the default intercept is taken over from the `formula` object, which then by default adds an intercept term to the model equation, if not specified otherwise.
 Finally, we use `match.call` to return the call of our function with all the specified arguments by their full names.
 
 ```{r LinMod}
@@ -165,8 +165,8 @@ linMod <- function(formula, data) {
   y <- model.extract(model.frame(formula, data = data), "response")
   
   # Create the design matrix using model.matrix, which overtakes an intercept
-  # specified in formula by default and converts factor variables into proper
-  # dummy-variables
+  # specified in the formula argument by default and converts factor variables into proper
+  # dummy variables
   x <- model.matrix(formula, data = data)
   
   # Use previously defined linModEst for estimation
