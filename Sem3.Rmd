@@ -141,7 +141,7 @@ In this section, we write a new function `linMod(formula, data)`, which estimate
 Below, we use the `model.frame`, `model.extract`, and `model.matrix` functions, which are very convenient for working with objects of the class `formula`. `model.frame` returns a `data.frame` containing only the variables from its passed `data` argument, which are used in the `formula` expression given. The returned `data.frame` from the `model.frame` function has additional attributes, but these are not needed in our application. With `model.extract`, we are able to extract the response variable from the `data.frame` created by `model.frame`. Moreover, using `model.matrix`, we can create the design matrix (of object class `matrix`) again only from `formula` and `data` arguments. By default, the matrix returned by `model.matrix` includes an intercept and converts factor variables into proper dummy variables (i.e. a factor variable with $L$ levels results in $L-1$ dummy variables). More precisely, the default intercept is taken over from the `formula` object, which then by default adds an intercept term to the model equation, if not specified otherwise.
 Finally, we use `match.call` to return the call of our function with all the specified arguments by their full names.
 
-```{r LinMod}
+```{r linMod}
 linMod <- function(formula, data) {
   # Computes the OLS estimator and sample variance assuming a (ordinary) linear
   # regression model with model equation specified by the formula-argument.
@@ -188,7 +188,7 @@ linMod <- function(formula, data) {
 
 Let's again test our implementation:
 
-```{r LinMod Test}
+```{r linMod Test}
 linMod(Hwt ~ Bwt + Sex, data = cats)
 ```
 
@@ -197,3 +197,69 @@ As we can see, the output has the desired format and the correct results.
 
 \newpage
 ## Part II: S3 for linear models
+
+In this section we will expand upon our linear regression function using one of `R`'s object oriented systems: S3. Our goal is to improve the function by returning a more concise output and ultimately replicating the results of the `lm` function. We'll start by redefining `linMod` from Part I and assigning it the class `linMod`.
+
+```{r linMod Class}
+# Begin with the same linMod function as in Part I
+linMod <- function(formula, data) {
+  
+  y <- model.extract(model.frame(formula, data = data), "response")
+  
+  x <- model.matrix(formula, data = data)
+  
+  tmp <- linModEst(x, y)
+
+  rownames(tmp$coefficients) <- colnames(x)
+  colnames(tmp$vcov) <- colnames(x)
+  rownames(tmp$vcov) <- colnames(x)
+  
+  results <- c(tmp, formula, match.call())
+  names(results) <- c("coefficients", "vcov", "sigma", "df", "formula", "call")
+  
+# Use the class function to redefine the results with class "linMod"
+  class(results) <- "linMod"
+
+# Return results (of class "linMod")
+  results
+}
+```
+
+Now we'd like to define a printing method for all objects of class `linMod` so that the function returns a more readable and concise output.
+
+```{r linMod Print Method}
+# Define a printing method for linMod using the generic print function 
+print.linMod <- function(x, ...) 
+  
+  # Use cat function to neatly return the function call and coefficients
+  cat("Call:",
+      "\n",
+      deparse(x$call),
+      "\n",
+      "\nCoefficients:\n",
+      rownames(x$coefficients), 
+      "\n",
+      round(x$coefficients, digits = 3), 
+      sep = "\t")
+```
+
+Let's check the structure of `linMod`:
+
+```{r linMod Class Test}
+# Define the model to be estimated from Part I
+modelFit <- linMod(Hwt ~ Bwt + Sex, data = cats)
+
+# Verify the class of modelFit as well as the objects it contains 
+str(modelFit)
+```
+
+Lastly, we simply want to print the model to see that the output is now clear and easy to read. We shouldn't have to explicitly use `print` either. `R` will recognize the newly defined `linMod` class and then locate the `linMod` *method* that we have written for the generic `print` function.
+
+```{r print.linMod Test}
+# Print modelFit
+modelFit
+```
+
+The output is now much clearer and user-friendly. 
+
+
