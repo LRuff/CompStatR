@@ -103,8 +103,8 @@ linModEst <- function(x, y) {
 }
 ```
 
-We test our implementation by computing the linear relationship between heart weight, body weight and sex for the `cats` dataset contained in the package `MASS`. In the following piece of code, `cbind` combines its arguments by columns into a matrix with the number of columns given by the number of arguments and the number of rows given by the greatest length of the given arguments. Shorter arguments are repeated, as long as the matrix number of rows is a multiple of the shorter vector lengths.
-Hence, `cbind(1, cats$Bwt, as.numeric(cats$Sex) - 1)` creates a design matrix with an intercept column, the variable body weight (`bwt`), and the variable sex (`Sex`), which is converted from a factor into a dummy variable using `as.numeric`. We subtract $1$ to receive dummy variable values of $0$ and $1$, rather than $1$ and $2$ from the original data. Thus, `cbind` is used to build a proper design matrix of object type `matrix` with an intercept and dummy variable, such that our implementation of `linModEst` works correctly.
+We test our implementation by computing the linear relationship between heart weight, body weight and sex for the `cats` dataset contained in the package `MASS`. In the following piece of code, `cbind` combines its arguments by columns into a matrix with the number of columns given by the number of arguments and the number of rows given by the greatest length of the given arguments. Shorter arguments are repeated, as long as the matrix number of rows is a multiple of the shorter vector lengths.  
+Hence, `cbind(1, cats$Bwt, as.numeric(cats$Sex) - 1)` creates a design matrix with an intercept column out of a vector of ones, the variable body weight (`bwt`), and the variable sex (`Sex`), which is converted from a factor into a dummy variable using `as.numeric`. We subtract $1$ to receive dummy variable values of $0$ and $1$, rather than $1$ and $2$ from the original data. Thus, `cbind` is used to build a proper design matrix of object type `matrix` with an intercept and dummy variable, such that our implementation of `linModEst` works correctly.
 
 \newpage
 
@@ -194,66 +194,75 @@ linMod(Hwt ~ Bwt + Sex, data = cats)
 
 As we can see, the output has the desired format and the correct results.
 
-
 \newpage
+
 ## Part II: S3 for linear models
 
-In this section we will expand upon our linear regression function using one of `R`'s object oriented systems: S3. Our goal is to improve the function by returning a more concise output and ultimately replicating the results of the `lm` function. We'll start by redefining `linMod` from Part I and assigning it the class `linMod`.
+In this section we will expand upon our linear regression function using `R`'s object oriented system `S3`. Our goal is to improve the function by returning a more concise output and ultimately replicating the results of the `lm` function. We'll start by redefining `linMod` from Part I and assigning it the class `linMod`. While assigning the a new class, the function operates as *constructor*. As the name implies, this function "constructs" instances of the class `linMod`. So the result will be a list of this type. The assigned class can be used to call a specific method of the generic function `print`.
+
+First we implement the constructor `linMod` (modified function from Part I):
 
 ```{r linMod Class}
-# Begin with the same linMod function as in Part I
 linMod <- function(formula, data) {
-  
+  # Extract responsevariable and design matrix
   y <- model.extract(model.frame(formula, data = data), "response")
-  
   x <- model.matrix(formula, data = data)
   
+  # Calulcate model, use function from part I
   tmp <- linModEst(x, y)
-
+  
+  # Prepare the output
   rownames(tmp$coefficients) <- colnames(x)
   colnames(tmp$vcov) <- colnames(x)
   rownames(tmp$vcov) <- colnames(x)
   
-  results <- c(tmp, formula, match.call())
-  names(results) <- c("coefficients", "vcov", "sigma", "df", "formula", "call")
+  # Create results list to be returned, additionaly add x and y as list
+  results <- c(tmp, formula, match.call(), list(x), list(y))
+  names(results) <- c("coefficients", "vcov", "sigma", "df",
+                      "formula", "call", "x", "y")
   
-# Use the class function to redefine the results with class "linMod"
+  # Redefine the results to class "linMod"
+  # This function has now the role of a constructor
   class(results) <- "linMod"
 
-# Return results (of class "linMod")
+  # Return instance of class "linMod"
   results
 }
 ```
 
-Now we'd like to define a printing method for all objects of class `linMod` so that the function returns a more readable and concise output.
+Now we'd like to define a printing method for all objects of class `linMod` so that the function returns a more readable and concise output. We want to use a style which is close to the style for printing the `lm` information. To avoid writing a function with a new name, we define a nem method `print.lindMod` of the generic function `print`, assigned to the class `linMod`.
 
 ```{r linMod Print Method}
-# Define a printing method for linMod using the generic print function 
-print.linMod <- function(x, ...) 
+print.linMod <- function(x, ...)  {
+  # Use cat and sapply function to neatly return
+  # the function call and coefficients
+  #
+  # Args:
+  #   x: instance of class linMod
+  #   ...: passed arguments from generic function to this method
+  #
+  # Returns:
+  #   This function does not retun anything, it just produces an output
   
-  # Use cat function to neatly return the function call and coefficients
-  cat("Call:",
-      "\n",
-      deparse(x$call),
-      "\n",
-      "\nCoefficients:\n",
-      rownames(x$coefficients), 
-      "\n",
-      round(x$coefficients, digits = 3), 
-      sep = "\t")
+  cat("Call:\n", deparse(x$call),"\n\n","Coefficients:\n",
+      sapply(rownames(x$coefficients), sprintf, fmt="%11s"),"\n",
+      sapply(round(x$coefficients, digits = 3), sprintf, fmt="%11s"),"\n",
+      sep="")
+}
 ```
 
-Let's check the structure of `linMod`:
+First we want to have a look at the structure of our list, which is instance of the `linMod` class:
 
 ```{r linMod Class Test}
-# Define the model to be estimated from Part I
+# Call constructur function which constructs an instance of class "linMod"
+# Internally it still uses the model calculation from Part I (linModEst)
 modelFit <- linMod(Hwt ~ Bwt + Sex, data = cats)
 
-# Verify the class of modelFit as well as the objects it contains 
+# Verify the structure of modelFit
 str(modelFit)
 ```
 
-Lastly, we simply want to print the model to see that the output is now clear and easy to read. We shouldn't have to explicitly use `print` either. `R` will recognize the newly defined `linMod` class and then locate the `linMod` *method* that we have written for the generic `print` function.
+Lastly, we simply want to print the model to see that the output is now clear and easy to read and similar to `lm`. It is not necessary to call the defined method above explicitly in some way. `R` will recognize the newly defined `linMod` class and then locate the `linMod` *method* that we have written for the generic `print` function. We just need to call `print`. And becaus `R` automatically calls print, if just enter the object, we just need to call:
 
 ```{r print.linMod Test}
 # Print modelFit
@@ -262,4 +271,11 @@ modelFit
 
 The output is now much clearer and user-friendly. 
 
+Next, we define a function, which will add some more information to the `modelFit` object. This function will be a method for our class `linMod` again. We just want to call the `summary` function and we want that `R` automatically detects the class and calls our own new method `summary.linMod`.
+
+```{r summary.linMod Method}
+summary.linMod <- function(x, ...)  {
+  
+}
+```
 
