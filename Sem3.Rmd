@@ -217,7 +217,7 @@ linMod <- function(formula, data) {
   rownames(tmp$vcov) <- colnames(x)
   
   # Create results list to be returned, additionaly add x and y as list
-  results <- c(tmp, formula, match.call(), list(x), list(y))
+  results <- c(tmp, formula, match.call(), list(x, y))
   names(results) <- c("coefficients", "vcov", "sigma", "df",
                       "formula", "call", "x", "y")
   
@@ -244,7 +244,7 @@ print.linMod <- function(x, ...)  {
   # Returns:
   #   This function does not retun anything, it just produces an output
   
-  cat("Call:\n", deparse(x$call),"\n\n","Coefficients:\n",
+  cat("Call:\n", deparse(x$call), "\n\n", "Coefficients:\n",
       sapply(rownames(x$coefficients), sprintf, fmt="%11s"),"\n",
       sapply(round(x$coefficients, digits = 3), sprintf, fmt="%11s"),"\n",
       sep="")
@@ -275,7 +275,78 @@ Next, we define a function, which will add some more information to the `modelFi
 
 ```{r summary.linMod Method}
 summary.linMod <- function(x, ...)  {
+  # Coefficients
+  estimates <- x$coefficients
+  stdErr <- sqrt(diag(x$vcov))
+  tValue <- estimates/stdErr
+  pValue <- 2*pt(-abs(tValue),df=(nrow(x$x)-ncol(x$x)))
+  x$coefficients <- cbind(estimates, stdErr, tValue, pValue)
+  colnames(x$coefficients) <- c("Estimate", "Std. Err.", "t value", "P(>|t|)")
   
+  # Residuals
+  residuals <- x$y - (x$x %*% estimates)
+  row.names(residuals) <- NULL  # Remove row numbering
+  
+  # R Squared
+  rSquared <- 1-(var(residuals)/var(x$y))
+  
+  # Combine result
+  results <- c(x, list(residuals=residuals[,1], rSquared=rSquared))
+  
+  # Redefine the results to class "summary.linMod"
+  # This function has now the role of a constructor
+  class(results) <- "summary.linMod"
+  
+  # Return result
+  results
+}
+```
+
+
+```{r print.summary.linMod Method}
+print.summary.linMod <- function(x, ...)  {
+  
+  # Prepare residuals
+  resQuant <- quantile(x$residuals)
+  resMean <- mean(x$residuals)
+  residuals <- c(resQuant[1:3],resMean,resQuant[4:5])
+  names(residuals) <- c("Min.","1st Qu.","Median","Mean","3rd Qu.","Max.")
+  
+  # Prepare coefficients
+  coefficientsFormatting <- c("%-11s %8s %9s %7s %7s")
+  
+  coefficientsNames <- sprintf(coefficientsFormatting,
+                               " ",
+                               colnames(x$coefficients)[1],
+                               colnames(x$coefficients)[2],
+                               colnames(x$coefficients)[3],
+                               colnames(x$coefficients)[4])
+                               
+  
+  coefficients <- NULL
+  for(i in 1:nrow(x$coefficients)) {
+    coefficients <- paste(coefficients,
+                          sprintf(coefficientsFormatting,
+                                  rownames(x$coefficients)[i],
+                                  sprintf("%.4f", round(x$coefficients[i,1], 4)),
+                                  sprintf("%.4f", round(x$coefficients[i,2], 4)),
+                                  sprintf("%.2f", round(x$coefficients[i,3], 2)),
+                                  format.pval(x$coefficients[i,4], 2)),
+                          sep="\n")
+  }
+  
+  # Print everything
+  cat("Call:\n", deparse(x$call),"\n\n",
+      "Residuals:\n",
+      sapply(names(residuals), sprintf, fmt="%9s"), "\n",
+      sapply(sprintf("%.5f", round(residuals, 5)),
+             sprintf, fmt="%9s"), "\n\n",
+      "Coefficients:\n", coefficientsNames, coefficients, "\n",
+      "---\n",
+      "Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n\n",
+      "Multiple R-squared: ", x$rSquared, "\n",
+      "More Stats ...",
+      sep="")
 }
 ```
 
