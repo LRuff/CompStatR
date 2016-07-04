@@ -302,6 +302,13 @@ summary.linMod <- function(x, ...)  {
 }
 ```
 
+```{r summary.linMod Class Test}
+# Call constructur func. which constructs an instance of class "summary.linMod"
+summaryOfMOdelFit <- summary(modelFit)
+
+# Verify the structure of summaryOfMOdelFit
+str(summaryOfMOdelFit)
+```
 
 ```{r print.summary.linMod Method}
 print.summary.linMod <- function(x, ...)  {
@@ -350,3 +357,7 @@ print.summary.linMod <- function(x, ...)  {
 }
 ```
 
+```{r print.summray.linMod Test}
+# Print modelFit
+summaryOfMOdelFit
+```
