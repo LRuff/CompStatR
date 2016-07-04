@@ -200,7 +200,9 @@ As we can see, the output has the desired format and the correct results.
 
 In this section we will expand upon our linear regression function using `R`'s object oriented system `S3`. Our goal is to improve the function by returning a more concise output and ultimately replicating the results of the `lm` function. We'll start by redefining `linMod` from Part I and assigning it the class `linMod`. While assigning the a new class, the function operates as *constructor*. As the name implies, this function "constructs" instances of the class `linMod`. So the result will be a list of this type. The assigned class can be used to call a specific method of the generic function `print`.
 
-First we implement the constructor `linMod` (modified function from Part I):
+### 1. Define the class
+
+First we implement the constructor `linMod` (modified function from Part I). For some additional calculations later (in summary method), we also return the data `x` and the response `y`.
 
 ```{r linMod Class}
 linMod <- function(formula, data) {
@@ -230,11 +232,24 @@ linMod <- function(formula, data) {
 }
 ```
 
+Now we want to have a look at the structure of our list, which is instance of the `linMod` class:
+
+```{r linMod Class Test}
+# Call constructur function which constructs an instance of class "linMod"
+# Internally it still uses the model calculation from Part I (linModEst)
+modelFit <- linMod(Hwt ~ Bwt + Sex, data = cats)
+
+# Verify the structure of modelFit
+str(modelFit)
+```
+
+### 2. Print method
+
 Now we'd like to define a printing method for all objects of class `linMod` so that the function returns a more readable and concise output. We want to use a style which is close to the style for printing the `lm` information. To avoid writing a function with a new name, we define a nem method `print.lindMod` of the generic function `print`, assigned to the class `linMod`.
 
 ```{r linMod Print Method}
 print.linMod <- function(x, ...)  {
-  # Use cat and sapply function to neatly return
+  # Use cat, sapply and sprintf function to neatly return
   # the function call and coefficients
   #
   # Args:
@@ -251,18 +266,7 @@ print.linMod <- function(x, ...)  {
 }
 ```
 
-First we want to have a look at the structure of our list, which is instance of the `linMod` class:
-
-```{r linMod Class Test}
-# Call constructur function which constructs an instance of class "linMod"
-# Internally it still uses the model calculation from Part I (linModEst)
-modelFit <- linMod(Hwt ~ Bwt + Sex, data = cats)
-
-# Verify the structure of modelFit
-str(modelFit)
-```
-
-Lastly, we simply want to print the model to see that the output is now clear and easy to read and similar to `lm`. It is not necessary to call the defined method above explicitly in some way. `R` will recognize the newly defined `linMod` class and then locate the `linMod` *method* that we have written for the generic `print` function. We just need to call `print`. And becaus `R` automatically calls print, if just enter the object, we just need to call:
+We simply want to print the model to see that the output is now clear and easy to read and similar to `lm`. It is not necessary to call the defined method above explicitly in some way. `R` will recognize the newly defined `linMod` class and then locate the `linMod` *method* that we have written for the generic `print` function. We just need to call `print`. And becaus `R` automatically calls print, if just enter the object, we just need to call:
 
 ```{r print.linMod Test}
 # Print modelFit
@@ -271,11 +275,67 @@ modelFit
 
 The output is now much clearer and user-friendly. 
 
-Next, we define a function, which will add some more information to the `modelFit` object. This function will be a method for our class `linMod` again. We just want to call the `summary` function and we want that `R` automatically detects the class and calls our own new method `summary.linMod`.
+### 3. Summary method
+
+Next, we define a function, which will add some more information to the `modelFit` object. This function will be a method for our class `linMod` again. We just want to call the `summary` function and we want that `R` automatically detects the class and calls our new method `summary.linMod`.
+
+To build the summary we need to caluclate the *standard error* $\sigma(\hat\beta)$, the *t value*, the *p value*, the *residuals* and the *coefficient of determination*. We first want to have a look at the calculation for these values.
+
+The *standard error* is calculated by the square root of the diagonal of the covariance matrix $\text{Var}(\hat\beta)$.
+
+\begin{equation}
+\sigma(\hat\beta) = \sqrt{\text{diag}\left(\text{Var}(\hat\beta)\right)}
+\end{equation}
+
+To compute the *t value*, we first need to define our hypothesis. In the case of regression we usually test all parameters against a zero vector, which means, that $\beta_0 = 0$.
+
+\begin{equation}
+t = \frac{\beta-\beta_o}{\sigma(\hat\beta)} = \frac{\beta}{\sigma(\hat\beta)}
+\end{equation}
+
+For the calculation of the *p value* we need to calculate the propability that our estimator is zero, using the t distribution. In `R` we can use the `pt` function to compute the probability. Mathematically, for a two sided test with symmetric distribution it means that:
+
+\begin{equation}
+p = 2\cdot \mathbb{P}(T \ge t)
+\end{equation}
+
+The *residuals* are simply the difference between the response $y$ and the modeled response $\hat y$.
+
+\begin{equation}
+\hat\epsilon = y - \hat y = y - X\hat\beta
+\end{equation}
+
+At last, we calculate the *coefficient of determination* $R^2$ (also known as R-squared), which indicates the proportion of the variance in the dependent variable that is predictable from the independent variable. To calculate this coeffiecient, we need to caluclate the variance of the residuals $\hat\epsilon$, which we call $RSS$, and the variation of $y$, which we call $TSS$.
+
+\begin{equation}
+R^2 = 1 - \frac{\text{RSS}}{\text{TSS}}
+\end{equation}
+
+In the `summary.linMod` method, we compute all these values, combine them, give a class and return the results as follows:
 
 ```{r summary.linMod Method}
 summary.linMod <- function(x, ...)  {
-  # Coefficients
+  # This summary method for ojects of class linMod adds additional information
+  # It computes standard errors, t values, p values, residuals and
+  # the r squared and adds these information to the existsing information
+  #
+  # Args:
+  #   x: instance of class linMod
+  #   ...: passed arguments from generic function to this method
+  #
+  # Returns:
+  # A list with the following named elements:
+  #     $coefficients: named matrix of the estimated coefficients,
+  #                   their standard errors, t values and p values
+  #     $vcov: named estimated covariance matrix
+  #     $sigma: the square root of the estimated variance
+  #     $df: the degrees of freedom in the model
+  #     $formula: the formula that represents the model equation
+  #     $call: the arguments with which the function was called
+  #     $residuals: the residuals of the regression line
+  #     $rSquared: coefficient of determination of the model
+  
+  # Compute extra information for coefficients and combine them
   estimates <- x$coefficients
   stdErr <- sqrt(diag(x$vcov))
   tValue <- estimates/stdErr
@@ -283,43 +343,65 @@ summary.linMod <- function(x, ...)  {
   x$coefficients <- cbind(estimates, stdErr, tValue, pValue)
   colnames(x$coefficients) <- c("Estimate", "Std. Err.", "t value", "P(>|t|)")
   
-  # Residuals
+  # Compute residuals on basis of estimated response
   residuals <- x$y - (x$x %*% estimates)
   row.names(residuals) <- NULL  # Remove row numbering
   
-  # R Squared
+  # Compute r squared of whole model
   rSquared <- 1-(var(residuals)/var(x$y))
   
-  # Combine result
+  # Combine all result in one list
   results <- c(x, list(residuals=residuals[,1], rSquared=rSquared))
   
   # Redefine the results to class "summary.linMod"
   # This function has now the role of a constructor
   class(results) <- "summary.linMod"
   
-  # Return result
+  # Return results
   results
 }
 ```
 
+After the implementation, we can test the strcture of our new object:
+
 ```{r summary.linMod Class Test}
-# Call constructur func. which constructs an instance of class "summary.linMod"
+# Call constructur function which constructs an
+# instance of class "summary.linMod"
 summaryOfMOdelFit <- summary(modelFit)
 
 # Verify the structure of summaryOfMOdelFit
 str(summaryOfMOdelFit)
 ```
 
+We can see, that we now have a list of 10 entries, where `$residuals` and `$rSquared` are new, and additionally the coefficient vector is extended.
+
+### 4. Print method for summary.linMod
+
+In the next step we want to have a method ro print objects of class `summary.linMod` in a self defined way. For this purpose we define a new method `print.summary.linMod` which, again, bases on the generic function `print`. The goal is to have an output which is similar to the `print.summary.lm` method.
+
 ```{r print.summary.linMod Method}
 print.summary.linMod <- function(x, ...)  {
+  # Use cat, sapply and sprintf function to neatly return
+  # the function call, the extended coefficients,
+  # the residuals and the r squared
+  #
+  # Args:
+  #   x: instance of class summary.linMod
+  #   ...: passed arguments from generic function to this method
+  #
+  # Returns:
+  #   This function does not retun anything, it just produces an output
   
-  # Prepare residuals
+  # Prepare residuals using quantile and mean function
+  # Combine the results in a specific order and name it
   resQuant <- quantile(x$residuals)
   resMean <- mean(x$residuals)
   residuals <- c(resQuant[1:3],resMean,resQuant[4:5])
   names(residuals) <- c("Min.","1st Qu.","Median","Mean","3rd Qu.","Max.")
   
-  # Prepare coefficients
+  # Prepare the extended coefficients
+  # First the significant levels are defined, then the colnames are prepared
+  # and in the last step the values are managed
   
   # Prepare significant levels
   pValues <- x$coefficients[,4]
@@ -337,7 +419,7 @@ print.summary.linMod <- function(x, ...)  {
     }
   })
   
-  # Prepare colnames and values
+  # Prepare colnames of coeffiecients
   coefficientsFormatting <- c("%-11s %8s %9s %7s %7s%4s")
   coefficientsNames <- sprintf(coefficientsFormatting,
                                " ",
@@ -347,7 +429,7 @@ print.summary.linMod <- function(x, ...)  {
                                colnames(x$coefficients)[4],
                                " ")
                                
-  
+  # Prepare values of coeffiecients, using the significant levels
   coefficients <- NULL
   for(i in 1:nrow(x$coefficients)) {
     coefficients <- paste(coefficients,
@@ -362,7 +444,7 @@ print.summary.linMod <- function(x, ...)  {
                           sep="\n")
   }
   
-  # Print everything
+  # Print everything using cat
   cat("Call:\n", deparse(x$call),"\n\n",
       "Residuals:\n",
       sapply(names(residuals), sprintf, fmt="%9s"), "\n",
@@ -377,21 +459,48 @@ print.summary.linMod <- function(x, ...)  {
 }
 ```
 
+If we simply print the object `summaryOfMOdelFit` of class `summary.linMod`, `R` again automatically detects the class and chooses the correct method, defined by us.
+
 ```{r print.summray.linMod Test}
 # Print summaryOfMOdelFit
 summaryOfMOdelFit
 ```
 
+As we can see, the result is beatyfull and very similar to the output of `print.summary.lm`.
+
+### 5. Plot method
+
+The last method will be a Q-Q plot. The Q-Q plot compares two probability distributions. In our case we want to compare the distribution of the result values `y` with the theoretical quantiles of the standard normal distribution. For that purpose we can use the `qqnorm` function. Additionally we can draw a line of the ideal relation, using the `qqline` function from the `R` base package.
+
+The method will be written for objects of class `linMod`. In this case, we have to compute the residuals again, because the residual calculation before was done for objects of class `summary.linMod`, which is not the input here.
+
 ```{r plot.linMod Method}
 plot.linMod <- function(x, ...) {
+  # Use qqnorm and qqline to plot a Q-Q plot
+  #
+  # Args:
+  #   x: instance of class linMod
+  #   ...: passed arguments from generic function to this method
+  #
+  # Returns:
+  #   This function does not retun anything, it just produces an output
+  
+  # Compute the residuals
   residuals <- x$y - (x$x %*% x$coefficients)
+  
+  # Plot residuals against standard normal quantiles
   qqnorm(residuals, main="Normal QQ-Plot of Model Residuals")
+  
+  # Additionally draw a line with the ideal relation
   qqline(residuals)
 }
 
 ```
 
+If we call the generic plot function, `R` will find the correct method again, because `modelFit` is of class `linMod`.
+
 ```{r plot.linMod Test}
 # Plot modelFit
 plot(modelFit)
 ```
+
