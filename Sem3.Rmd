@@ -378,6 +378,20 @@ print.summary.linMod <- function(x, ...)  {
 ```
 
 ```{r print.summray.linMod Test}
-# Print modelFit
+# Print summaryOfMOdelFit
 summaryOfMOdelFit
+```
+
+```{r plot.linMod Method}
+plot.linMod <- function(x, ...) {
+  residuals <- x$y - (x$x %*% x$coefficients)
+  qqnorm(residuals, main="Normal QQ-Plot of Model Residuals")
+  qqline(residuals)
+}
+
+```
+
+```{r plot.linMod Test}
+# Plot modelFit
+plot(modelFit)
 ```
