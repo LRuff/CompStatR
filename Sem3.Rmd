@@ -320,14 +320,32 @@ print.summary.linMod <- function(x, ...)  {
   names(residuals) <- c("Min.","1st Qu.","Median","Mean","3rd Qu.","Max.")
   
   # Prepare coefficients
-  coefficientsFormatting <- c("%-11s %8s %9s %7s %7s")
   
+  # Prepare significant levels
+  pValues <- x$coefficients[,4]
+  pStars <- sapply(pValues, function(p) {
+    if(p < 0.001) {
+      return("***")
+    } else if(p < 0.01) {
+      return("**")
+    } else if(p < 0.05) {
+      return("*")
+    } else if(p < 0.1) {
+      return(".")
+    } else if(p < 1) {
+      return(" ")
+    }
+  })
+  
+  # Prepare colnames and values
+  coefficientsFormatting <- c("%-11s %8s %9s %7s %7s%4s")
   coefficientsNames <- sprintf(coefficientsFormatting,
                                " ",
                                colnames(x$coefficients)[1],
                                colnames(x$coefficients)[2],
                                colnames(x$coefficients)[3],
-                               colnames(x$coefficients)[4])
+                               colnames(x$coefficients)[4],
+                               " ")
                                
   
   coefficients <- NULL
@@ -338,7 +356,9 @@ print.summary.linMod <- function(x, ...)  {
                                   sprintf("%.4f", round(x$coefficients[i,1], 4)),
                                   sprintf("%.4f", round(x$coefficients[i,2], 4)),
                                   sprintf("%.2f", round(x$coefficients[i,3], 2)),
-                                  format.pval(x$coefficients[i,4], 2)),
+                                  format.pval(x$coefficients[i,4], 2),
+                                  pStars[i]
+                                  ),
                           sep="\n")
   }
   
