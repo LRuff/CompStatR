@@ -287,7 +287,7 @@ The output is now much clearer and more user-friendly.
 
 Next we'll define a function to add some more information to the `linMod` object. We would just like to call the `summary` function, so we'll again write a new method `summary.linMod` for our class `linMod`. Therefore, when calling `summary`, `R` again automatically detects the class and calls our new method.
 
-To build the summary we need to calculate the *standard errors*, the *t-values*, the *p-values*, the *residuals* and the *coefficient of determination*. let's first have a look at the calculation of these values.
+To build the summary we need to calculate the *standard errors*, the *t-values*, the *p-values*, the *residuals* and the *coefficient of determination*. Let's first have a look at the calculation of these values.
 
 The *standard error* $\text{se}(\hat\beta_i)$ of the estimated coefficient $\hat{\beta}_i$ is given by its estimated standard deviation. Hence, the *standard errors* $\text{se}(\hat\beta)$ are given by the square roots of the elements on the diagonal of the estimated covariance matrix $\widehat{\text{Var}(\hat{\beta)}}$:
 
